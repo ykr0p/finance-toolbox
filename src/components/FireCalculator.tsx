@@ -243,14 +243,14 @@ export function FireCalculator() {
         id="panel-calculator"
         role="tabpanel"
         aria-labelledby={`tab-${mode}`}
-        className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6"
+        className="flex-1 max-w-[1840px] w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 py-6"
       >
         {/* Split Screen Grid: Left (Inputs) | Right (Results, Chart, Table) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* Left Side: Inputs Form (5 cols on lg) */}
+          {/* Left Side: Inputs Form (5 cols on lg, 4 cols on xl/2xl) */}
           <section
             aria-label="Параметры симуляции"
-            className="lg:col-span-5 lg:sticky lg:top-24"
+            className="lg:col-span-5 xl:col-span-4 lg:sticky lg:top-24"
           >
             <InputForm
               mode={mode}
@@ -262,10 +262,10 @@ export function FireCalculator() {
             />
           </section>
 
-          {/* Right Side: Results, Chart, Table (7 cols on lg) */}
+          {/* Right Side: Results, Chart, Table (7 cols on lg, 8 cols on xl/2xl) */}
           <section
             aria-label="Результаты расчета и симуляция"
-            className="lg:col-span-7 space-y-6"
+            className="lg:col-span-7 xl:col-span-8 space-y-6"
           >
             {/* Top Cards (Главные цифры) */}
             <MetricCards result={calculationResult} currency={currency} />
@@ -280,7 +280,7 @@ export function FireCalculator() {
       </main>
 
       <footer className="border-t border-slate-200 bg-white py-6 mt-12 text-center text-xs text-slate-500">
-        <div className="max-w-7xl mx-auto px-4">
+        <div className="max-w-[1840px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10">
           <p>
             Калькулятор раннего выхода на пенсию (FIRE). Простая и гибкая математические модели долгосрочной симуляции капитала.
           </p>

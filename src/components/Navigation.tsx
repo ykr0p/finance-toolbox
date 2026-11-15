@@ -117,7 +117,7 @@ export function Navigation({ rightSlot }: NavigationProps) {
 
   return (
     <header className="border-b border-slate-200 bg-white/95 backdrop-blur-md sticky top-0 z-30 shadow-xs">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1840px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10">
         <div className="flex items-center justify-between h-16 gap-3">
           {/* Left: Brand Logo & Title */}
           <div className="flex items-center gap-6">

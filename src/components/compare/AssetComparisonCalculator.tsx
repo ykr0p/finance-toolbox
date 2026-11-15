@@ -62,10 +62,10 @@ export function AssetComparisonCalculator() {
       <Navigation />
 
       {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+      <main className="flex-1 max-w-[1840px] w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 py-6 space-y-6">
         {/* Page Title & Subtitle Banner */}
         <div className="bg-gradient-to-r from-blue-700 via-indigo-700 to-slate-900 rounded-2xl p-5 sm:p-7 text-white shadow-md relative overflow-hidden">
-          <div className="relative z-10 max-w-3xl space-y-2">
+          <div className="relative z-10 max-w-5xl space-y-2">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-xs text-xs font-semibold text-blue-100 border border-white/15">
               <BarChart3 className="w-3.5 h-3.5 text-blue-300" />
               Историческая доходность (2003 — 2024)
@@ -86,8 +86,8 @@ export function AssetComparisonCalculator() {
 
         {/* 2-Column Responsive Layout: Controls on Left, Visuals on Right */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* Left Column: Parameters Panel (4 cols) */}
-          <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-20">
+          {/* Left Column: Parameters Panel (5 cols on lg, 4 cols on xl/2xl) */}
+          <div className="lg:col-span-5 xl:col-span-4 space-y-6 lg:sticky lg:top-20">
             <CompareInputPanel
               inputs={inputs}
               onChange={setInputs}
@@ -95,8 +95,8 @@ export function AssetComparisonCalculator() {
             />
           </div>
 
-          {/* Right Column: Results, Charts & Tables (7 cols) */}
-          <div className="lg:col-span-7 space-y-6">
+          {/* Right Column: Results, Charts & Tables (7 cols on lg, 8 cols on xl/2xl) */}
+          <div className="lg:col-span-7 xl:col-span-8 space-y-6">
             {/* Leaderboard Cards */}
             <CompareLeaderboard result={result} currency={currency} />
 
@@ -118,7 +118,7 @@ export function AssetComparisonCalculator() {
 
       {/* Footer */}
       <footer className="border-t border-slate-200 bg-white py-6 mt-12 text-center text-xs text-slate-500">
-        <div className="max-w-7xl mx-auto px-4">
+        <div className="max-w-[1840px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10">
           <p>
             Исторические данные приведены на основе официальной статистики Московской биржи, Банка
             России, Росстата, IRN.RU и SlickCharts за 2003–2024 гг.

@@ -15,7 +15,7 @@ export function Tabs({ mode, onChangeMode }: TabsProps) {
       <div
         role="tablist"
         aria-label="Режим расчета FIRE"
-        className="flex space-x-2 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto"
+        className="flex space-x-2 px-4 sm:px-6 lg:px-8 xl:px-10 max-w-[1840px] mx-auto"
       >
         <button
           type="button"
