@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { FireCalculationResult } from "@/types/fire";
+import { FireCalculationResult, CurrencyCode } from "@/types/fire";
 import { formatCurrency, formatYears, formatAge, formatPercent } from "@/lib/formatters";
 import {
   Calendar,
@@ -16,9 +16,10 @@ import {
 
 interface MetricCardsProps {
   result: FireCalculationResult;
+  currency: CurrencyCode;
 }
 
-export function MetricCards({ result }: MetricCardsProps) {
+export function MetricCards({ result, currency }: MetricCardsProps) {
   const {
     target_capital_today,
     retirement_age,
@@ -75,10 +76,10 @@ export function MetricCards({ result }: MetricCardsProps) {
           </div>
           <div className="mt-3">
             <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 tabular-nums">
-              {formatCurrency(target_capital_today, { compact: true })}
+              {formatCurrency(target_capital_today, currency, { compact: true })}
             </div>
             <div className="text-xs text-slate-500 mt-1 tabular-nums">
-              {formatCurrency(target_capital_today)}
+              {formatCurrency(target_capital_today, currency)}
             </div>
           </div>
           <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
@@ -177,7 +178,7 @@ export function MetricCards({ result }: MetricCardsProps) {
           <div className="flex items-center justify-between mt-1">
             <span className="text-sm sm:text-base font-bold text-slate-900 tabular-nums">
               {capital_at_retirement !== null
-                ? formatCurrency(capital_at_retirement, { compact: true })
+                ? formatCurrency(capital_at_retirement, currency, { compact: true })
                 : "—"}
             </span>
             <span className="text-[10px] text-slate-400 font-medium">с инфляцией</span>
@@ -189,7 +190,7 @@ export function MetricCards({ result }: MetricCardsProps) {
           <div className="flex items-center justify-between mt-1">
             <span className="text-sm sm:text-base font-bold text-emerald-700 tabular-nums">
               {monthlyPassiveIncomeAtRetirement > 0
-                ? formatCurrency(monthlyPassiveIncomeAtRetirement, { compact: true })
+                ? formatCurrency(monthlyPassiveIncomeAtRetirement, currency, { compact: true })
                 : "—"}
             </span>
             <span className="text-[10px] text-emerald-600 font-medium">в ценах пенсии</span>
@@ -200,7 +201,7 @@ export function MetricCards({ result }: MetricCardsProps) {
           <span className="text-[11px] font-medium text-slate-500 block">Довнесения сегодня</span>
           <div className="flex items-center justify-between mt-1">
             <span className="text-sm sm:text-base font-bold text-slate-900 tabular-nums">
-              {formatCurrency(monthly_savings_today, { compact: true })}
+              {formatCurrency(monthly_savings_today, currency, { compact: true })}
             </span>
             <span className="text-[10px] text-slate-400 font-medium">в месяц</span>
           </div>

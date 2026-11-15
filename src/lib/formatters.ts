@@ -1,33 +1,75 @@
+import { CurrencyCode, CURRENCY_CONFIGS } from "@/types/fire";
+
 /**
- * Currency, number and plural formatters for FIRE calculator (Russian locale)
+ * Currency, number and plural formatters for FIRE calculator
  */
+
+export function getCurrencySymbol(currency: CurrencyCode = "RUB"): string {
+  return CURRENCY_CONFIGS[currency]?.symbol || "₽";
+}
+
+const RATES_TO_RUB: Record<CurrencyCode, number> = {
+  RUB: 1,
+  USD: 95,
+  EUR: 100,
+  BYN: 30,
+};
+
+/**
+ * Converts financial values between currencies with intuitive rounding
+ */
+export function convertCurrencyValue(
+  value: number,
+  from: CurrencyCode,
+  to: CurrencyCode
+): number {
+  if (from === to || value === 0) return value;
+  const inRub = value * RATES_TO_RUB[from];
+  const converted = inRub / RATES_TO_RUB[to];
+
+  if (to === "RUB") {
+    return Math.round(converted / 1000) * 1000;
+  }
+  return Math.round(converted / 50) * 50;
+}
 
 export function formatCurrency(
   value: number,
+  currency: CurrencyCode = "RUB",
   options?: { compact?: boolean; hideDecimals?: boolean }
 ): string {
   if (value === null || value === undefined || isNaN(value)) {
-    return "0 ₽";
+    return `0 ${getCurrencySymbol(currency)}`;
   }
+
+  const symbol = getCurrencySymbol(currency);
 
   if (options?.compact) {
     const abs = Math.abs(value);
     if (abs >= 1_000_000_000) {
-      return `${(value / 1_000_000_000).toFixed(2).replace(/\.00$/, "")} млрд ₽`;
+      return `${(value / 1_000_000_000).toFixed(2).replace(/\.00$/, "")} млрд ${symbol}`;
     }
     if (abs >= 1_000_000) {
-      return `${(value / 1_000_000).toFixed(2).replace(/\.00$/, "")} млн ₽`;
+      return `${(value / 1_000_000).toFixed(2).replace(/\.00$/, "")} млн ${symbol}`;
     }
     if (abs >= 1_000) {
-      return `${(value / 1_000).toFixed(0)} тыс. ₽`;
+      return `${(value / 1_000).toFixed(0)} тыс. ${symbol}`;
     }
   }
 
   const rounded = options?.hideDecimals !== false ? Math.round(value) : value;
 
+  if (currency === "BYN") {
+    const formatted = new Intl.NumberFormat("ru-RU", {
+      maximumFractionDigits: options?.hideDecimals !== false ? 0 : 2,
+      minimumFractionDigits: 0,
+    }).format(rounded);
+    return `${formatted} Br`;
+  }
+
   return new Intl.NumberFormat("ru-RU", {
     style: "currency",
-    currency: "RUB",
+    currency,
     maximumFractionDigits: options?.hideDecimals !== false ? 0 : 2,
     minimumFractionDigits: 0,
   }).format(rounded);

@@ -13,15 +13,16 @@ import {
   ReferenceLine,
   ReferenceDot,
 } from "recharts";
-import { FireCalculationResult } from "@/types/fire";
+import { FireCalculationResult, CurrencyCode } from "@/types/fire";
 import { formatCurrency } from "@/lib/formatters";
 import { BarChart3, Maximize2, Sparkles } from "lucide-react";
 
 interface CapitalChartProps {
   result: FireCalculationResult;
+  currency: CurrencyCode;
 }
 
-export function CapitalChart({ result }: CapitalChartProps) {
+export function CapitalChart({ result, currency }: CapitalChartProps) {
   const [maxDisplayYears, setMaxDisplayYears] = useState<number>(30);
   const [showBreakdown, setShowBreakdown] = useState<boolean>(false);
 
@@ -107,8 +108,8 @@ export function CapitalChart({ result }: CapitalChartProps) {
               fontSize={11}
               tickLine={false}
               axisLine={false}
-              tickFormatter={(value) => formatCurrency(value, { compact: true })}
-              width={75}
+              tickFormatter={(value) => formatCurrency(value, currency, { compact: true })}
+              width={80}
             />
             <Tooltip
               content={({ active, payload, label }) => {
@@ -140,7 +141,7 @@ export function CapitalChart({ result }: CapitalChartProps) {
                           Общий капитал:
                         </span>
                         <span className="font-bold tabular-nums">
-                          {formatCurrency(row.total_capital)}
+                          {formatCurrency(row.total_capital, currency)}
                         </span>
                       </div>
 
@@ -150,7 +151,7 @@ export function CapitalChart({ result }: CapitalChartProps) {
                           Цель (с инфляцией):
                         </span>
                         <span className="font-bold tabular-nums">
-                          {formatCurrency(row.target_capital)}
+                          {formatCurrency(row.target_capital, currency)}
                         </span>
                       </div>
 
@@ -158,11 +159,11 @@ export function CapitalChart({ result }: CapitalChartProps) {
                         <>
                           <div className="flex justify-between items-center text-slate-300 pt-1 border-t border-slate-800">
                             <span>В активах:</span>
-                            <span className="tabular-nums">{formatCurrency(row.assets)}</span>
+                            <span className="tabular-nums">{formatCurrency(row.assets, currency)}</span>
                           </div>
                           <div className="flex justify-between items-center text-slate-300">
                             <span>В подушке:</span>
-                            <span className="tabular-nums">{formatCurrency(row.cushion)}</span>
+                            <span className="tabular-nums">{formatCurrency(row.cushion, currency)}</span>
                           </div>
                         </>
                       )}
@@ -170,7 +171,7 @@ export function CapitalChart({ result }: CapitalChartProps) {
                       <div className="flex justify-between items-center text-slate-400 pt-1 border-t border-slate-800">
                         <span>Расходы в год:</span>
                         <span className="tabular-nums">
-                          {formatCurrency(row.annual_expenses)}
+                          {formatCurrency(row.annual_expenses, currency)}
                         </span>
                       </div>
                     </div>

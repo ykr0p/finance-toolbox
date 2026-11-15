@@ -6,8 +6,11 @@ import {
   SimpleFireInputs,
   FlexibleFireInputs,
   FireInputs,
+  CurrencyCode,
+  CURRENCY_CONFIGS,
 } from "@/types/fire";
 import { calculateFIRE } from "@/lib/calculator";
+import { convertCurrencyValue } from "@/lib/formatters";
 import { Header } from "./Header";
 import { Tabs } from "./Tabs";
 import { InputForm } from "./InputForm";
@@ -46,8 +49,33 @@ const DEFAULT_FLEXIBLE_INPUTS: FlexibleFireInputs = {
 
 export function FireCalculator() {
   const [mode, setMode] = useState<CalculatorMode>("simple");
+  const [currency, setCurrency] = useState<CurrencyCode>("RUB");
   const [simpleInputs, setSimpleInputs] = useState<SimpleFireInputs>(DEFAULT_SIMPLE_INPUTS);
   const [flexibleInputs, setFlexibleInputs] = useState<FlexibleFireInputs>(DEFAULT_FLEXIBLE_INPUTS);
+
+  // Currency switch handler with automatic smart scaling of monetary amounts
+  const handleCurrencyChange = (newCurrency: CurrencyCode) => {
+    if (newCurrency === currency) return;
+
+    setSimpleInputs((prev) => ({
+      ...prev,
+      monthly_income: convertCurrencyValue(prev.monthly_income, currency, newCurrency),
+      monthly_expenses: convertCurrencyValue(prev.monthly_expenses, currency, newCurrency),
+      current_assets: convertCurrencyValue(prev.current_assets, currency, newCurrency),
+      liabilities_value: convertCurrencyValue(prev.liabilities_value, currency, newCurrency),
+    }));
+
+    setFlexibleInputs((prev) => ({
+      ...prev,
+      monthly_income: convertCurrencyValue(prev.monthly_income, currency, newCurrency),
+      monthly_expenses: convertCurrencyValue(prev.monthly_expenses, currency, newCurrency),
+      current_assets: convertCurrencyValue(prev.current_assets, currency, newCurrency),
+      liabilities_value: convertCurrencyValue(prev.liabilities_value, currency, newCurrency),
+      short_term_debts: convertCurrencyValue(prev.short_term_debts, currency, newCurrency),
+    }));
+
+    setCurrency(newCurrency);
+  };
 
   // Sync common fields when mode switches so the user doesn't lose data
   const handleModeChange = (newMode: CalculatorMode) => {
@@ -82,18 +110,48 @@ export function FireCalculator() {
   };
 
   const handleSelectPreset = (preset: "standard" | "aggressive" | "conservative") => {
+    const cfg = CURRENCY_CONFIGS[currency];
+    const baseIncome = cfg.defaultMonthlyIncome;
+    const baseExpenses = cfg.defaultMonthlyExpenses;
+    const baseAssets = cfg.defaultAssets;
+
     if (preset === "standard") {
-      setSimpleInputs(DEFAULT_SIMPLE_INPUTS);
-      setFlexibleInputs(DEFAULT_FLEXIBLE_INPUTS);
+      const stdCommon = {
+        age: 30,
+        monthly_income: baseIncome,
+        monthly_expenses: baseExpenses,
+        personal_inflation: 10,
+        savings_indexation: 10,
+        current_assets: baseAssets,
+        liabilities_value: 0,
+        dividend_yield: 8,
+        capital_growth: 7,
+      };
+      setSimpleInputs({
+        ...stdCommon,
+        capital_multiplier: 1,
+      });
+      setFlexibleInputs({
+        ...stdCommon,
+        cushion_months: 6,
+        short_term_debts: 0,
+        cushion_yield: 12,
+        dividend_consumption_pct: 70,
+      });
     } else if (preset === "aggressive") {
+      const aggIncome = Math.round((baseIncome * 1.65) / cfg.incomeStep) * cfg.incomeStep;
+      const aggExpenses = Math.round((baseExpenses * 1.15) / cfg.incomeStep) * cfg.incomeStep;
+      const aggAssets = Math.round((baseAssets * 1.6) / cfg.assetsStep) * cfg.assetsStep;
+      const aggLiabilities = Math.round((baseAssets * 0.3) / cfg.assetsStep) * cfg.assetsStep;
+
       const aggCommon = {
         age: 26,
-        monthly_income: 250000,
-        monthly_expenses: 70000,
+        monthly_income: aggIncome,
+        monthly_expenses: aggExpenses,
         personal_inflation: 8,
         savings_indexation: 12,
-        current_assets: 2500000,
-        liabilities_value: 500000,
+        current_assets: aggAssets,
+        liabilities_value: aggLiabilities,
         dividend_yield: 9,
         capital_growth: 8,
       };
@@ -109,13 +167,18 @@ export function FireCalculator() {
         dividend_consumption_pct: 70,
       });
     } else if (preset === "conservative") {
+      const consIncome = Math.round((baseIncome * 0.8) / cfg.incomeStep) * cfg.incomeStep;
+      const consExpenses = Math.round((baseExpenses * 0.9) / cfg.incomeStep) * cfg.incomeStep;
+      const consAssets = Math.round((baseAssets * 0.7) / cfg.assetsStep) * cfg.assetsStep;
+      const consDebts = Math.round((baseExpenses * 0.8) / cfg.incomeStep) * cfg.incomeStep;
+
       const consCommon = {
         age: 35,
-        monthly_income: 120000,
-        monthly_expenses: 55000,
+        monthly_income: consIncome,
+        monthly_expenses: consExpenses,
         personal_inflation: 10,
         savings_indexation: 7,
-        current_assets: 1000000,
+        current_assets: consAssets,
         liabilities_value: 0,
         dividend_yield: 7,
         capital_growth: 6,
@@ -127,7 +190,7 @@ export function FireCalculator() {
       setFlexibleInputs({
         ...consCommon,
         cushion_months: 12,
-        short_term_debts: 50000,
+        short_term_debts: consDebts,
         cushion_yield: 11,
         dividend_consumption_pct: 50,
       });
@@ -146,7 +209,12 @@ export function FireCalculator() {
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
-      <Header mode={mode} onSelectPreset={handleSelectPreset} />
+      <Header
+        mode={mode}
+        currency={currency}
+        onChangeCurrency={handleCurrencyChange}
+        onSelectPreset={handleSelectPreset}
+      />
       <Tabs mode={mode} onChangeMode={handleModeChange} />
 
       <main
@@ -164,6 +232,7 @@ export function FireCalculator() {
           >
             <InputForm
               mode={mode}
+              currency={currency}
               simpleInputs={simpleInputs}
               flexibleInputs={flexibleInputs}
               onChangeSimple={setSimpleInputs}
@@ -177,13 +246,13 @@ export function FireCalculator() {
             className="lg:col-span-7 space-y-6"
           >
             {/* Top Cards (Главные цифры) */}
-            <MetricCards result={calculationResult} />
+            <MetricCards result={calculationResult} currency={currency} />
 
             {/* Recharts Growth Chart */}
-            <CapitalChart result={calculationResult} />
+            <CapitalChart result={calculationResult} currency={currency} />
 
             {/* Simulation Table Data Grid */}
-            <SimulationTable result={calculationResult} />
+            <SimulationTable result={calculationResult} currency={currency} />
           </section>
         </div>
       </main>

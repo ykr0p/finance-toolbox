@@ -1,18 +1,20 @@
 "use client";
 
 import React, { useState } from "react";
-import { FireCalculationResult, SimulationYearRow } from "@/types/fire";
-import { formatCurrency, formatNumber } from "@/lib/formatters";
+import { FireCalculationResult, SimulationYearRow, CurrencyCode } from "@/types/fire";
+import { formatCurrency, formatNumber, getCurrencySymbol } from "@/lib/formatters";
 import { Table, Download, CheckCircle2, ChevronRight, Filter } from "lucide-react";
 
 interface SimulationTableProps {
   result: FireCalculationResult;
+  currency: CurrencyCode;
 }
 
-export function SimulationTable({ result }: SimulationTableProps) {
+export function SimulationTable({ result, currency }: SimulationTableProps) {
   const [filterMode, setFilterMode] = useState<"all" | "retirement_plus" | "first_20">("retirement_plus");
 
   const { rows, years_to_retirement, mode } = result;
+  const currencySymbol = getCurrencySymbol(currency);
 
   // Filter rows based on view mode
   const displayedRows = rows.filter((row) => {
@@ -30,18 +32,18 @@ export function SimulationTable({ result }: SimulationTableProps) {
     const headers = [
       "Год",
       "Возраст",
-      "Расходы в год (руб)",
-      "Требуемая подушка (руб)",
-      "Целевой капитал (руб)",
-      "Общий капитал (руб)",
-      "Капитал в активах (руб)",
-      "Подушка (руб)",
-      "Довнесения (руб)",
-      "Доход с подушки (руб)",
-      "Прирост тела (руб)",
-      "Дивиденды всего (руб)",
-      "Дивиденды (реинвест) (руб)",
-      "Дивиденды (на потребление) (руб)",
+      `Расходы в год (${currencySymbol})`,
+      `Требуемая подушка (${currencySymbol})`,
+      `Целевой капитал (${currencySymbol})`,
+      `Общий капитал (${currencySymbol})`,
+      `Капитал в активах (${currencySymbol})`,
+      `Подушка (${currencySymbol})`,
+      `Довнесения (${currencySymbol})`,
+      `Доход с подушки (${currencySymbol})`,
+      `Прирост тела (${currencySymbol})`,
+      `Дивиденды всего (${currencySymbol})`,
+      `Дивиденды (реинвест) (${currencySymbol})`,
+      `Дивиденды (на потребление) (${currencySymbol})`,
       "Статус",
     ];
 
@@ -242,13 +244,13 @@ export function SimulationTable({ result }: SimulationTableProps) {
 
                   {/* Расходы в год */}
                   <td className="py-2.5 px-3 text-right tabular-nums text-slate-600 whitespace-nowrap">
-                    {formatCurrency(row.annual_expenses)}
+                    {formatCurrency(row.annual_expenses, currency)}
                   </td>
 
                   {/* Требуемая подушка */}
                   <td className="py-2.5 px-3 text-right tabular-nums text-slate-600 whitespace-nowrap">
                     {row.required_cushion > 0
-                      ? formatCurrency(row.required_cushion)
+                      ? formatCurrency(row.required_cushion, currency)
                       : "—"}
                   </td>
 
@@ -262,19 +264,19 @@ export function SimulationTable({ result }: SimulationTableProps) {
                         : "text-slate-900 bg-slate-50/30"
                     }`}
                   >
-                    {formatCurrency(row.total_capital)}
+                    {formatCurrency(row.total_capital, currency)}
                   </td>
 
                   {/* Капитал в активах */}
                   <td className="py-2.5 px-3 text-right tabular-nums text-slate-700 whitespace-nowrap">
-                    {formatCurrency(row.assets)}
+                    {formatCurrency(row.assets, currency)}
                   </td>
 
                   {/* Довнесения (сбережения) */}
                   <td className="py-2.5 px-3 text-right tabular-nums whitespace-nowrap">
                     {row.savings_added > 0 ? (
                       <span className="text-slate-800">
-                        +{formatCurrency(row.savings_added)}
+                        +{formatCurrency(row.savings_added, currency)}
                       </span>
                     ) : (
                       <span className="text-slate-300 font-normal">0 (Пенсия)</span>
@@ -284,7 +286,7 @@ export function SimulationTable({ result }: SimulationTableProps) {
                   {/* Доход с подушки */}
                   <td className="py-2.5 px-3 text-right tabular-nums text-slate-600 whitespace-nowrap">
                     {row.cushion_income > 0
-                      ? `+${formatCurrency(row.cushion_income)}`
+                      ? `+${formatCurrency(row.cushion_income, currency)}`
                       : "—"}
                   </td>
 
@@ -298,7 +300,7 @@ export function SimulationTable({ result }: SimulationTableProps) {
                             : "text-rose-600"
                         }
                       >
-                        +{formatCurrency(row.capital_body_growth)}
+                        +{formatCurrency(row.capital_body_growth, currency)}
                       </span>
                     ) : (
                       "—"
@@ -309,7 +311,7 @@ export function SimulationTable({ result }: SimulationTableProps) {
                   <td className="py-2.5 px-3 text-right tabular-nums whitespace-nowrap">
                     {row.dividends_reinvested > 0 ? (
                       <span className="text-blue-700 font-medium">
-                        +{formatCurrency(row.dividends_reinvested)}
+                        +{formatCurrency(row.dividends_reinvested, currency)}
                       </span>
                     ) : (
                       <span className="text-slate-300">0</span>
@@ -320,7 +322,7 @@ export function SimulationTable({ result }: SimulationTableProps) {
                   <td className="py-2.5 px-3 text-right tabular-nums whitespace-nowrap">
                     {row.dividends_for_consumption > 0 ? (
                       <span className="text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100">
-                        {formatCurrency(row.dividends_for_consumption)}
+                        {formatCurrency(row.dividends_for_consumption, currency)}
                       </span>
                     ) : (
                       <span className="text-slate-300">0</span>

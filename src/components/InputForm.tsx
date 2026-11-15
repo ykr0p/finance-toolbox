@@ -6,9 +6,11 @@ import {
   SimpleFireInputs,
   FlexibleFireInputs,
   CalculatorMode,
+  CurrencyCode,
+  CURRENCY_CONFIGS,
 } from "@/types/fire";
 import { validateInputs } from "@/lib/validation";
-import { formatCurrency, formatPercent } from "@/lib/formatters";
+import { formatCurrency, formatPercent, getCurrencySymbol } from "@/lib/formatters";
 import {
   HelpCircle,
   AlertCircle,
@@ -23,6 +25,7 @@ import {
 
 interface InputFormProps {
   mode: CalculatorMode;
+  currency: CurrencyCode;
   simpleInputs: SimpleFireInputs;
   flexibleInputs: FlexibleFireInputs;
   onChangeSimple: (inputs: SimpleFireInputs) => void;
@@ -31,12 +34,15 @@ interface InputFormProps {
 
 export function InputForm({
   mode,
+  currency,
   simpleInputs,
   flexibleInputs,
   onChangeSimple,
   onChangeFlexible,
 }: InputFormProps) {
   const isFlexible = mode === "flexible";
+  const currencyConfig = CURRENCY_CONFIGS[currency] || CURRENCY_CONFIGS.RUB;
+  const currencySymbol = currencyConfig.symbol;
   const currentInputs: FireInputs = isFlexible
     ? { mode: "flexible", ...flexibleInputs }
     : { mode: "simple", ...simpleInputs };
@@ -217,8 +223,8 @@ export function InputForm({
             label: "Ежемесячный доход",
             tooltip: "Ваш чистый совокупный доход в месяц (после налогов)",
             value: isFlexible ? flexibleInputs.monthly_income : simpleInputs.monthly_income,
-            suffix: "₽",
-            step: 5000,
+            suffix: currencySymbol,
+            step: currencyConfig.incomeStep,
             min: 0,
           })}
 
@@ -227,8 +233,8 @@ export function InputForm({
             label: "Ежемесячные расходы",
             tooltip: "Текущие средние расходы на жизнь в месяц",
             value: isFlexible ? flexibleInputs.monthly_expenses : simpleInputs.monthly_expenses,
-            suffix: "₽",
-            step: 5000,
+            suffix: currencySymbol,
+            step: currencyConfig.incomeStep,
             min: 0,
           })}
 
@@ -267,7 +273,7 @@ export function InputForm({
                   monthlySavings >= 0 ? "text-emerald-700" : "text-rose-600"
                 }`}
               >
-                {formatCurrency(monthlySavings)}
+                {formatCurrency(monthlySavings, currency)}
               </span>
               <span className="text-xs font-semibold text-slate-500 bg-white px-1.5 py-0.5 rounded border border-slate-200">
                 {savingsRate.toFixed(0)}% дохода
@@ -294,8 +300,8 @@ export function InputForm({
             label: "Капитал в активах",
             tooltip: "Текущие средства в акциях, облигациях, фондах или депозитах",
             value: isFlexible ? flexibleInputs.current_assets : simpleInputs.current_assets,
-            suffix: "₽",
-            step: 50000,
+            suffix: currencySymbol,
+            step: currencyConfig.assetsStep,
             min: 0,
           })}
 
@@ -305,8 +311,8 @@ export function InputForm({
             tooltip:
               "Продажная стоимость имущества (машина, гараж, дача), если решите продать для инвестиций",
             value: isFlexible ? flexibleInputs.liabilities_value : simpleInputs.liabilities_value,
-            suffix: "₽",
-            step: 50000,
+            suffix: currencySymbol,
+            step: currencyConfig.assetsStep,
             min: 0,
           })}
 
@@ -319,8 +325,8 @@ export function InputForm({
                 tooltip:
                   "Потребительские кредиты, кредитные карты и долги, которые нужно вычесть из капитала",
                 value: flexibleInputs.short_term_debts,
-                suffix: "₽",
-                step: 10000,
+                suffix: currencySymbol,
+                step: currencyConfig.assetsStep,
                 min: 0,
               })}
 
