@@ -64,7 +64,7 @@ export function formatCurrency(
       maximumFractionDigits: options?.hideDecimals !== false ? 0 : 2,
       minimumFractionDigits: 0,
     }).format(rounded);
-    return `${formatted} Br`;
+    return `${formatted} BYN`;
   }
 
   return new Intl.NumberFormat("ru-RU", {

@@ -50,7 +50,7 @@ export const CURRENCY_CONFIGS: Record<CurrencyCode, CurrencyConfig> = {
   },
   BYN: {
     code: "BYN",
-    symbol: "Br",
+    symbol: "BYN",
     name: "Белорусский рубль (BYN)",
     flag: "🇧🇾",
     defaultMonthlyIncome: 4500,

@@ -11,6 +11,7 @@ import {
 } from "@/types/fire";
 import { validateInputs } from "@/lib/validation";
 import { formatCurrency, formatPercent, getCurrencySymbol } from "@/lib/formatters";
+import { BelarusianRubleIcon } from "./icons/BelarusianRubleIcon";
 import {
   HelpCircle,
   AlertCircle,
@@ -160,7 +161,14 @@ export function InputForm({
             }`}
           />
           <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-            <span className="text-xs font-medium text-slate-400">{suffix}</span>
+            {suffix === "BYN" ? (
+              <span className="flex items-center gap-1 text-xs font-semibold text-slate-500">
+                <BelarusianRubleIcon className="w-3.5 h-3.5 text-slate-500" />
+                <span>BYN</span>
+              </span>
+            ) : (
+              <span className="text-xs font-medium text-slate-400">{suffix}</span>
+            )}
           </div>
         </div>
 
