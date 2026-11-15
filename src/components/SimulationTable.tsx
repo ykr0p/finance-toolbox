@@ -91,7 +91,7 @@ export function SimulationTable({ result }: SimulationTableProps) {
           <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
             <Table className="w-4 h-4 text-emerald-600" />
             <span id="simulation-table-caption">
-              Таблица симуляции по годам (Модель Excel 2.0)
+              Таблица симуляции по годам
             </span>
           </h2>
           <p className="text-xs text-slate-500 mt-0.5">

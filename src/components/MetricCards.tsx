@@ -119,8 +119,8 @@ export function MetricCards({ result }: MetricCardsProps) {
               }`}
             >
               {retirement_age !== null
-                ? retirement_age <= 35
-                  ? "FIRE до 35 лет 🎯"
+                ? retirement_age <= 40
+                  ? "Ранний выход 🎯"
                   : "FIRE достижим"
                 : "Не достигнуто"}
             </span>

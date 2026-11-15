@@ -7,8 +7,7 @@ import {
 } from "@/types/fire";
 
 /**
- * Calculates FIRE (Financial Independence, Retire Early) timeline and projection
- * based strictly on the Excel model "На пенсию в 35 лет" (Версия 2.0).
+ * Calculates FIRE (Financial Independence, Retire Early) timeline and projection.
  */
 export function calculateFIRE(inputs: FireInputs): FireCalculationResult {
   const isFlexible = inputs.mode === "flexible";

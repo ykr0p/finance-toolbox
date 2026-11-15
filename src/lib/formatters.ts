@@ -53,7 +53,7 @@ export function formatPercent(value: number, decimals: number = 1): string {
  * Proper Russian plural forms:
  * formatPlural(1, ['год', 'года', 'лет']) => "1 год"
  * formatPlural(24, ['год', 'года', 'лет']) => "24 года"
- * formatPlural(35, ['год', 'года', 'лет']) => "35 лет"
+ * formatPlural(50, ['год', 'года', 'лет']) => "50 лет"
  */
 export function formatPlural(value: number, titles: [string, string, string]): string {
   const abs = Math.abs(Math.round(value));

@@ -27,11 +27,11 @@ export function Header({ mode, onSelectPreset }: HeaderProps) {
                   Версия 2.0
                 </span>
                 <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-600">
-                  Модель Бабайкина
+                  Финансовая независимость
                 </span>
               </div>
               <p className="text-xs sm:text-sm text-slate-500">
-                Калькулятор раннего выхода на пенсию по модели канала «На пенсию в 35 лет»
+                Интерактивный расчет и симуляция достижения ранней пенсии
               </p>
             </div>
           </div>
