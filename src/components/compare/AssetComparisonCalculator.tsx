@@ -80,6 +80,18 @@ export function AssetComparisonCalculator() {
             const copy = [...prev];
             const idx = copy.findIndex((d) => d.year === json.year);
             if (idx >= 0) {
+              const cur = copy[idx];
+              const isIdentical =
+                cur.mcftr === json.data.mcftr &&
+                cur.gold_rub === json.data.gold_rub &&
+                cur.usd_rub_change === json.data.usd_rub_change &&
+                cur.bonds_rub === json.data.bonds_rub &&
+                cur.btc_usd === json.data.btc_usd &&
+                cur.gold_byn === json.data.gold_byn &&
+                cur.usd_byn_change === json.data.usd_byn_change;
+              if (isIdentical) {
+                return prev; // Avoid redundant re-render and visual jump
+              }
               copy[idx] = json.data;
             } else {
               copy.push(json.data);
