@@ -11,7 +11,7 @@ import {
 } from "@/types/fire";
 import { validateInputs } from "@/lib/validation";
 import { formatCurrency, formatPercent, getCurrencySymbol } from "@/lib/formatters";
-import { BelarusianRubleIcon } from "./icons/BelarusianRubleIcon";
+import { CurrencyIcon } from "./icons/CurrencyIcon";
 import {
   HelpCircle,
   AlertCircle,
@@ -105,6 +105,12 @@ export function InputForm({
   }) => {
     const error = touchedFields[name] ? errors[name] : undefined;
     const warning = warnings[name];
+    const isCurrencyField =
+      suffix === currencySymbol ||
+      suffix === "₽" ||
+      suffix === "$" ||
+      suffix === "€" ||
+      suffix === "BYN";
 
     return (
       <div className="space-y-1.5">
@@ -154,17 +160,17 @@ export function InputForm({
             onChange={(e) => handleInputChange(name, e)}
             onBlur={() => handleBlur(name)}
             placeholder="0"
-            className={`block w-full rounded-lg border py-2 pl-3 pr-12 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 tabular-nums transition ${
+            className={`block w-full rounded-lg border py-2 pl-3 pr-16 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 tabular-nums transition ${
               error
                 ? "border-rose-400 focus:border-rose-500 focus:ring-rose-200"
                 : "border-slate-300 focus:border-emerald-500 focus:ring-emerald-200"
             }`}
           />
           <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-            {suffix === "BYN" ? (
-              <span className="flex items-center gap-1 text-xs font-semibold text-slate-500">
-                <BelarusianRubleIcon className="w-3.5 h-3.5 text-slate-500" />
-                <span>BYN</span>
+            {isCurrencyField ? (
+              <span className="flex items-center gap-1 text-xs font-semibold text-slate-600">
+                <CurrencyIcon currency={currency} className="w-3.5 h-3.5 text-slate-500" />
+                <span>{currency}</span>
               </span>
             ) : (
               <span className="text-xs font-medium text-slate-400">{suffix}</span>
