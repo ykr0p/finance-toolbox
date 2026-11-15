@@ -15,7 +15,7 @@ export function BelarusianRubleIcon({
       viewBox="0 0 100 100"
       fill="currentColor"
       className={className}
-      aria-label="Новый знак белорусского рубля"
+      aria-label="Символ белорусского рубля"
     >
       {/* Outer body of letter Б with inner bowl cutout */}
       <path

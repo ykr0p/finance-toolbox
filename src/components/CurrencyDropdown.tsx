@@ -126,9 +126,8 @@ export function CurrencyDropdown({
                       <div className="flex items-center gap-1.5">
                         <span className="font-bold">{code}</span>
                         {code === "BYN" ? (
-                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] bg-emerald-100 text-emerald-800 font-semibold">
-                            <BelarusianRubleIcon className="w-3 h-3 text-emerald-700" />
-                            <span>Новый знак</span>
+                          <span className="text-slate-400 font-normal inline-flex items-center gap-0.5">
+                            (<BelarusianRubleIcon className="w-3.5 h-3.5 text-slate-700 inline" />)
                           </span>
                         ) : (
                           <span className="text-slate-400 font-normal">
