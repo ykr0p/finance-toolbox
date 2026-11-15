@@ -160,7 +160,14 @@ export function CompareAnnualTable({
               return (
                 <tr key={ar.year} className="hover:bg-slate-50/80 transition-colors">
                   <td className="py-2 px-3 font-bold text-slate-900 whitespace-nowrap">
-                    {ar.year}
+                    <span className="inline-flex items-center gap-1.5">
+                      <span>{ar.year}</span>
+                      {ar.isYtd && (
+                        <span className="text-[10px] font-extrabold px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800 border border-emerald-300" title="Year-To-Date (текущий незавершенный год)">
+                          YTD
+                        </span>
+                      )}
+                    </span>
                   </td>
                   <td className="py-2 px-3 text-right tabular-nums text-slate-500 whitespace-nowrap">
                     {ar.inflation_rub > 0 ? `+${ar.inflation_rub}%` : `${ar.inflation_rub}%`}

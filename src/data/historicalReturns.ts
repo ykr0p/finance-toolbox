@@ -361,7 +361,32 @@ export const HISTORICAL_DATA: HistoricalYearData[] = [
     inflation_rub: 9.51,
     usd_rub_change: 13.2,
   },
+  {
+    year: 2025,
+    mcftr: 2.94,
+    sp500_usd: 17.88,
+    gold_rub: 27.55,
+    real_estate_rub: 6.8,
+    deposits_rub: 18.5,
+    bonds_rub: 23.09,
+    btc_usd: -5.2,
+    inflation_rub: 5.59,
+    usd_rub_change: -23.83,
+  },
+  {
+    year: 2026,
+    mcftr: -1.24,
+    sp500_usd: 14.5,
+    gold_rub: -6.29,
+    real_estate_rub: 4.2,
+    deposits_rub: 14.8,
+    bonds_rub: 4.88,
+    btc_usd: -26.3,
+    inflation_rub: 5.8,
+    usd_rub_change: 6.73,
+    isYtd: true,
+  },
 ];
 
 export const MIN_HISTORICAL_YEAR = 2003;
-export const MAX_HISTORICAL_YEAR = 2024;
+export const MAX_HISTORICAL_YEAR = 2026;

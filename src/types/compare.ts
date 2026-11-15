@@ -32,6 +32,7 @@ export interface HistoricalYearData {
   btc_usd: number | null; // % за год в USD (null до 2011)
   inflation_rub: number; // % официальной инфляции Росстат
   usd_rub_change: number; // % изменения курса USD/RUB за год
+  isYtd?: boolean; // Флаг текущего незавершенного года (Year-To-Date)
 }
 
 export interface CompareInputs {
@@ -67,13 +68,15 @@ export interface ChartPoint {
   year: number;
   totalInvested: number;
   inflationBaseline: number;
-  [key: string]: number; // asset values by assetId
+  isYtd?: boolean;
+  [key: string]: number | boolean | undefined; // asset values by assetId
 }
 
 export interface AnnualReturnPoint {
   year: number;
   inflation_rub: number;
-  [key: string]: number; // asset returns by assetId
+  isYtd?: boolean;
+  [key: string]: number | boolean | undefined; // asset returns by assetId
 }
 
 export interface CompareResult {
@@ -87,4 +90,6 @@ export interface CompareResult {
   chartPoints: ChartPoint[];
   annualReturns: AnnualReturnPoint[];
   winner: AssetMetrics | null;
+  isLiveOnline?: boolean;
+  lastOnlineUpdate?: string;
 }

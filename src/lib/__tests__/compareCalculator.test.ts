@@ -119,4 +119,26 @@ console.log("--- Running Compare Calculator Unit Tests ---");
   console.log(`✓ Test 4 passed: Currency conversion works. S&P 500 RUB multiple: x${spRub.multiple}, USD multiple: x${spUsd.multiple}`);
 }
 
+// Test 5: Full period up to 2026 (YTD)
+{
+  const result2026 = calculateAssetComparison({
+    initialAmount: 100000,
+    monthlyContribution: 0,
+    startYear: 2003,
+    endYear: 2026,
+    selectedAssets: ["mcftr", "gold", "sp500", "bonds"],
+    currency: "RUB",
+    adjustForInflation: false,
+    scaleType: "linear",
+    includeBalancedPortfolio: true,
+  });
+
+  assert(result2026.endYear === 2026, "End year should be 2026");
+  assert(result2026.yearsCount === 24, "Should count 24 years (2003..2026)");
+  const ytdPoint = result2026.annualReturns.find((p) => p.year === 2026);
+  assert(ytdPoint !== undefined, "2026 annual return point must exist");
+  assert(ytdPoint!.isYtd === true, "2026 must be flagged as isYtd");
+  console.log(`✓ Test 5 passed: Full 24-year simulation up to 2026 (YTD) verified.`);
+}
+
 console.log("All Compare Calculator unit tests passed successfully!");

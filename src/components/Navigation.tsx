@@ -46,7 +46,7 @@ export const ALL_CALCULATORS: CalculatorItem[] = [
     id: "compare",
     title: "Сравнение активов",
     shortTitle: "Сравнение активов",
-    description: "Историческая доходность акций РФ, США, золота, недвижимости, депозитов и ОФЗ",
+    description: "Историческая доходность и онлайн котировки акций РФ, США, золота, недвижимости, вкладов, ОФЗ",
     href: "/compare",
     icon: BarChart3,
     isReady: true,

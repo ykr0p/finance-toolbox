@@ -101,6 +101,8 @@ export function getInflationReturn(data: HistoricalYearData, currency: string): 
     2022: 8.0,
     2023: 4.1,
     2024: 2.9,
+    2025: 2.7,
+    2026: 2.4,
   };
   return usCpiByYear[data.year] ?? 2.5;
 }
@@ -108,7 +110,10 @@ export function getInflationReturn(data: HistoricalYearData, currency: string): 
 /**
  * Основная функция расчета сравнения доходности активов
  */
-export function calculateAssetComparison(inputs: CompareInputs): CompareResult {
+export function calculateAssetComparison(
+  inputs: CompareInputs,
+  dataset: HistoricalYearData[] = HISTORICAL_DATA
+): CompareResult {
   const {
     initialAmount,
     monthlyContribution,
@@ -120,12 +125,13 @@ export function calculateAssetComparison(inputs: CompareInputs): CompareResult {
     includeBalancedPortfolio,
   } = inputs;
 
+  const maxYear = dataset.length > 0 ? Math.max(...dataset.map((d) => d.year)) : 2026;
   const validStartYear = Math.max(2003, Math.min(startYear, endYear));
-  const validEndYear = Math.max(validStartYear, Math.min(2024, endYear));
+  const validEndYear = Math.max(validStartYear, Math.min(maxYear, endYear));
   const yearsCount = validEndYear - validStartYear + 1;
 
   // Фильтруем исторические данные по выбранному диапазону лет
-  const filteredData = HISTORICAL_DATA.filter(
+  const filteredData = dataset.filter(
     (d) => d.year >= validStartYear && d.year <= validEndYear
   );
 
@@ -198,11 +204,13 @@ export function calculateAssetComparison(inputs: CompareInputs): CompareResult {
       year,
       totalInvested: Math.round(runningTotalInvested),
       inflationBaseline: Math.round(runningInflationBaseline),
+      isYtd: yearData.isYtd,
     };
 
     const annualReturnPoint: AnnualReturnPoint = {
       year,
       inflation_rub: yearInflation,
+      isYtd: yearData.isYtd,
     };
 
     // 1. Сначала рассчитываем доходности одиночных активов за год

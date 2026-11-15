@@ -16,6 +16,8 @@ import {
   Sparkles,
   SlidersHorizontal,
   Check,
+  RefreshCw,
+  Radio,
 } from "lucide-react";
 import { AssetId, CompareInputs } from "@/types/compare";
 import { CurrencyCode, CURRENCY_CONFIGS } from "@/types/fire";
@@ -25,6 +27,10 @@ interface CompareInputPanelProps {
   inputs: CompareInputs;
   onChange: (inputs: CompareInputs) => void;
   currency: CurrencyCode;
+  isOnline?: boolean;
+  lastOnlineUpdate?: string;
+  onRefreshOnline?: () => void;
+  isRefreshing?: boolean;
 }
 
 const ASSET_ICONS: Record<AssetId, React.ElementType> = {
@@ -42,6 +48,10 @@ export function CompareInputPanel({
   inputs,
   onChange,
   currency,
+  isOnline = true,
+  lastOnlineUpdate,
+  onRefreshOnline,
+  isRefreshing = false,
 }: CompareInputPanelProps) {
   const currencyConfig = CURRENCY_CONFIGS[currency] ?? CURRENCY_CONFIGS.RUB;
   const symbol = currencyConfig.symbol;
@@ -103,9 +113,9 @@ export function CompareInputPanel({
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-4 sm:p-5 space-y-6">
-      <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+          <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold shrink-0">
             <SlidersHorizontal className="w-4 h-4" />
           </div>
           <div>
@@ -116,6 +126,29 @@ export function CompareInputPanel({
               Настройте стартовый капитал, довнесения и период
             </p>
           </div>
+        </div>
+
+        {/* Live Auto-update Status Badge */}
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          <span
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/70"
+            title={lastOnlineUpdate ? `Обновлено: ${new Date(lastOnlineUpdate).toLocaleTimeString()}` : "Котировки Мосбиржи и ЦБ РФ подключены"}
+          >
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+            <span>Онлайн (2026 YTD)</span>
+          </span>
+
+          {onRefreshOnline && (
+            <button
+              type="button"
+              onClick={onRefreshOnline}
+              disabled={isRefreshing}
+              className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
+              title="Обновить котировки в реальном времени"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin text-blue-600" : ""}`} />
+            </button>
+          )}
         </div>
       </div>
 
@@ -224,58 +257,58 @@ export function CompareInputPanel({
         <div className="flex flex-wrap gap-1.5">
           <button
             type="button"
-            onClick={() => selectPresetPeriod(2003, 2024)}
+            onClick={() => selectPresetPeriod(2003, MAX_HISTORICAL_YEAR)}
             className={`text-xs px-2.5 py-1.5 rounded-lg border font-medium transition ${
-              inputs.startYear === 2003 && inputs.endYear === 2024
+              inputs.startYear === 2003 && inputs.endYear === MAX_HISTORICAL_YEAR
                 ? "bg-blue-600 border-blue-600 text-white font-bold shadow-xs"
                 : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100"
             }`}
           >
-            🌟 Все 22 года (2003–2024)
+            🌟 Все {MAX_HISTORICAL_YEAR - 2003 + 1} года (2003–{MAX_HISTORICAL_YEAR} YTD)
           </button>
           <button
             type="button"
-            onClick={() => selectPresetPeriod(2010, 2024)}
+            onClick={() => selectPresetPeriod(2011, MAX_HISTORICAL_YEAR)}
             className={`text-xs px-2.5 py-1.5 rounded-lg border font-medium transition ${
-              inputs.startYear === 2010 && inputs.endYear === 2024
+              inputs.startYear === 2011 && inputs.endYear === MAX_HISTORICAL_YEAR
                 ? "bg-blue-600 border-blue-600 text-white font-bold shadow-xs"
                 : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100"
             }`}
           >
-            15 лет (2010–2024)
+            15 лет (2011–{MAX_HISTORICAL_YEAR})
           </button>
           <button
             type="button"
-            onClick={() => selectPresetPeriod(2015, 2024)}
+            onClick={() => selectPresetPeriod(2016, MAX_HISTORICAL_YEAR)}
             className={`text-xs px-2.5 py-1.5 rounded-lg border font-medium transition ${
-              inputs.startYear === 2015 && inputs.endYear === 2024
+              inputs.startYear === 2016 && inputs.endYear === MAX_HISTORICAL_YEAR
                 ? "bg-blue-600 border-blue-600 text-white font-bold shadow-xs"
                 : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100"
             }`}
           >
-            10 лет (2015–2024)
+            10 лет (2016–{MAX_HISTORICAL_YEAR})
           </button>
           <button
             type="button"
-            onClick={() => selectPresetPeriod(2020, 2024)}
+            onClick={() => selectPresetPeriod(2021, MAX_HISTORICAL_YEAR)}
             className={`text-xs px-2.5 py-1.5 rounded-lg border font-medium transition ${
-              inputs.startYear === 2020 && inputs.endYear === 2024
+              inputs.startYear === 2021 && inputs.endYear === MAX_HISTORICAL_YEAR
                 ? "bg-blue-600 border-blue-600 text-white font-bold shadow-xs"
                 : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100"
             }`}
           >
-            5 лет (2020–2024)
+            5 лет (2021–{MAX_HISTORICAL_YEAR})
           </button>
           <button
             type="button"
-            onClick={() => selectPresetPeriod(2022, 2024)}
+            onClick={() => selectPresetPeriod(2023, MAX_HISTORICAL_YEAR)}
             className={`text-xs px-2.5 py-1.5 rounded-lg border font-medium transition ${
-              inputs.startYear === 2022 && inputs.endYear === 2024
+              inputs.startYear === 2023 && inputs.endYear === MAX_HISTORICAL_YEAR
                 ? "bg-blue-600 border-blue-600 text-white font-bold shadow-xs"
                 : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100"
             }`}
           >
-            3 года (2022–2024)
+            3 года (2023–{MAX_HISTORICAL_YEAR})
           </button>
         </div>
 
@@ -302,7 +335,7 @@ export function CompareInputPanel({
                 (_, i) => MIN_HISTORICAL_YEAR + i
               ).map((y) => (
                 <option key={y} value={y}>
-                  {y} г.
+                  {y === MAX_HISTORICAL_YEAR ? `${y} г. (YTD)` : `${y} г.`}
                 </option>
               ))}
             </select>
@@ -329,7 +362,7 @@ export function CompareInputPanel({
                 (_, i) => MIN_HISTORICAL_YEAR + i
               ).map((y) => (
                 <option key={y} value={y} disabled={y < inputs.startYear}>
-                  {y} г.
+                  {y === MAX_HISTORICAL_YEAR ? `${y} г. (YTD онлайн)` : `${y} г.`}
                 </option>
               ))}
             </select>
