@@ -2,8 +2,8 @@ import React from "react";
 
 /**
  * Official new graphic sign of the Belarusian Ruble (BYN)
- * Approved by the National Bank of the Republic of Belarus (Resolution No. 25, Jan 27, 2026)
- * Represents capital Cyrillic letter "Б" with a central horizontal strike-through line.
+ * Approved by the National Bank of the Republic of Belarus (Resolution No. 25, Jan 27, 2026).
+ * Stylized capital Cyrillic letter "Б" with central horizontal stability crossbar.
  */
 export function BelarusianRubleIcon({
   className = "w-4 h-4 inline-block",
@@ -12,23 +12,36 @@ export function BelarusianRubleIcon({
 }) {
   return (
     <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      viewBox="0 0 100 100"
+      fill="currentColor"
       className={className}
-      aria-label="Символ белорусского рубля (новый знак)"
+      aria-label="Новый знак белорусского рубля"
     >
-      {/* Top horizontal stroke of 'Б' */}
-      <path d="M6.5 4h10.5" />
-      {/* Vertical spine of 'Б' */}
-      <path d="M7.5 4v16" />
-      {/* Lower round bowl of 'Б' */}
-      <path d="M7.5 11h6a4.5 4.5 0 0 1 0 9h-6" />
-      {/* Central horizontal stroke-through bar (stability symbol) */}
-      <path d="M3.5 11h8.5" />
+      {/* Outer body of letter Б with inner bowl cutout */}
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M 24.5 10
+           H 76.5
+           V 19.5
+           H 35
+           V 44.5
+           H 63
+           C 75.5 44.5, 84.5 54.5, 84.5 67.2
+           C 84.5 80, 75.5 90, 63 90
+           H 24.5
+           V 10
+           Z
+           M 35 53.5
+           H 63
+           C 70.5 53.5, 74.5 59.5, 74.5 67.2
+           C 74.5 75, 70.5 81, 63 81
+           H 35
+           V 53.5
+           Z"
+      />
+      {/* Central horizontal stability crossbar */}
+      <rect x="15.5" y="62.5" width="39.2" height="9" rx="0.5" />
     </svg>
   );
 }
