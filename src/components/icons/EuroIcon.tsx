@@ -16,12 +16,9 @@ export function EuroIcon({
       className={className}
       aria-label="Евро (€)"
     >
-      {/* Outer C curve */}
-      <path d="M19 6a8 8 0 0 0-14 6 8 8 0 0 0 14 6" />
-      {/* Upper crossbar */}
-      <path d="M3.5 10h10.5" />
-      {/* Lower crossbar */}
-      <path d="M3.5 14h10.5" />
+      <path d="M4 10h12" />
+      <path d="M4 14h9" />
+      <path d="M19 6a7.7 7.7 0 0 0-5.2-2A7.9 7.9 0 0 0 6 12c0 4.4 3.5 8 7.8 8 2 0 3.8-.8 5.2-2" />
     </svg>
   );
 }

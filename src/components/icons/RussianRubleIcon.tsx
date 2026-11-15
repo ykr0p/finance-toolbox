@@ -16,12 +16,10 @@ export function RussianRubleIcon({
       className={className}
       aria-label="Российский рубль (₽)"
     >
-      {/* Vertical spine */}
-      <path d="M7 3v18" />
-      {/* Upper loop of P */}
-      <path d="M7 4h6.5a4.5 4.5 0 0 1 0 9H7" />
-      {/* Horizontal stroke */}
-      <path d="M4 14h9" />
+      {/* Upper loop of P connecting to vertical stem */}
+      <path d="M6 11h8a4 4 0 0 0 0-8H9v18" />
+      {/* Parallel horizontal crossbar */}
+      <path d="M6 15h8" />
     </svg>
   );
 }
