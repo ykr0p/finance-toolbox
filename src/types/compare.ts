@@ -5,8 +5,11 @@ export type AssetId =
   | "sp500" // Акции США (S&P 500 Total Return)
   | "gold" // Золото (XAU)
   | "real_estate" // Недвижимость (Москва IRN)
-  | "deposits" // Банковские депозиты
+  | "real_estate_minsk" // Недвижимость (Минск Realt.by)
+  | "deposits" // Банковские вклады (РФ)
+  | "deposits_by" // Вклады в BYN (НБРБ)
   | "bonds" // Облигации ОФЗ (RGBITR)
+  | "bonds_by" // Гособлигации РБ (Минфин РБ)
   | "btc" // Биткоин (BTC)
   | "portfolio"; // Сбалансированный портфель (1/N)
 
@@ -19,6 +22,7 @@ export interface AssetDefinition {
   category: "stocks" | "bonds" | "commodities" | "real_estate" | "crypto" | "cash" | "portfolio";
   startYear: number;
   iconName: string;
+  country?: "ru" | "by" | "us" | "global";
 }
 
 export interface HistoricalYearData {
@@ -26,12 +30,18 @@ export interface HistoricalYearData {
   mcftr: number; // % за год в RUB
   sp500_usd: number; // % за год в USD
   gold_rub: number; // % за год в RUB
-  real_estate_rub: number; // % за год в RUB
-  deposits_rub: number; // % за год в RUB
-  bonds_rub: number; // % за год в RUB
+  gold_byn?: number; // % за год в BYN (НБРБ)
+  real_estate_rub: number; // % за год в RUB (Москва IRN)
+  real_estate_minsk_usd?: number; // % за год в USD (Минск Realt.by)
+  deposits_rub: number; // % за год в RUB (ЦБ РФ)
+  deposits_byn?: number; // % за год в BYN (НБРБ)
+  bonds_rub: number; // % за год в RUB (RGBITR)
+  bonds_byn?: number; // % за год в BYN (Минфин РБ)
   btc_usd: number | null; // % за год в USD (null до 2011)
   inflation_rub: number; // % официальной инфляции Росстат
+  inflation_byn?: number; // % официальной инфляции Белстат
   usd_rub_change: number; // % изменения курса USD/RUB за год
+  usd_byn_change?: number; // % изменения курса USD/BYN за год
   isYtd?: boolean; // Флаг текущего незавершенного года (Year-To-Date)
 }
 
@@ -75,6 +85,7 @@ export interface ChartPoint {
 export interface AnnualReturnPoint {
   year: number;
   inflation_rub: number;
+  inflation_byn?: number;
   isYtd?: boolean;
   [key: string]: number | boolean | undefined; // asset returns by assetId
 }

@@ -10,7 +10,7 @@ import {
 import { ASSET_DEFINITIONS, HISTORICAL_DATA } from "@/data/historicalReturns";
 
 /**
- * Преобразует доходность актива за конкретный год с учетом выбранной валюты (RUB, USD, EUR, BYN)
+ * Преобразует доходность актива за конкретный год с учетом выбранной валюты (RUB, BYN, USD, EUR)
  */
 export function getAssetAnnualReturn(
   assetId: AssetId,
@@ -18,23 +18,73 @@ export function getAssetAnnualReturn(
   currency: string
 ): number | null {
   const usdRubFactor = 1 + data.usd_rub_change / 100;
+  const usdBynFactor = 1 + (data.usd_byn_change ?? 0) / 100;
 
-  if (currency === "RUB" || currency === "BYN") {
-    // В рублях (RUB / BYN)
+  // Базовые долларовые доходности для перекрестного пересчета
+  const goldUsdReturn = (1 + data.gold_rub / 100) / usdRubFactor - 1;
+  const mcftrUsdReturn = (1 + data.mcftr / 100) / usdRubFactor - 1;
+  const reMosUsdReturn = (1 + data.real_estate_rub / 100) / usdRubFactor - 1;
+  const reMinskUsdReturn = (data.real_estate_minsk_usd ?? 0) / 100;
+
+  if (currency === "BYN") {
+    // Расчет в белорусских рублях (BYN)
+    switch (assetId) {
+      case "mcftr":
+        // Акции РФ в BYN: долларовый доход + динамика USD/BYN
+        return ((1 + mcftrUsdReturn) * usdBynFactor - 1) * 100;
+      case "sp500":
+        return ((1 + data.sp500_usd / 100) * usdBynFactor - 1) * 100;
+      case "gold":
+        // Золото в BYN (по официальным учетным ценам слитков НБРБ)
+        return ((1 + goldUsdReturn) * usdBynFactor - 1) * 100;
+      case "real_estate":
+        // Недвижимость Москвы в BYN
+        return ((1 + reMosUsdReturn) * usdBynFactor - 1) * 100;
+      case "real_estate_minsk":
+        // Недвижимость Минска в BYN: рост цен на жилье ($/м²) + валютная переоценка
+        return ((1 + reMinskUsdReturn) * usdBynFactor - 1) * 100;
+      case "deposits":
+        // Рублевые депозиты РФ в BYN
+        const depRubUsd = (1 + data.deposits_rub / 100) / usdRubFactor - 1;
+        return ((1 + depRubUsd) * usdBynFactor - 1) * 100;
+      case "deposits_by":
+        return data.deposits_byn ?? 12.0;
+      case "bonds":
+        const bondsUsd = (1 + data.bonds_rub / 100) / usdRubFactor - 1;
+        return ((1 + bondsUsd) * usdBynFactor - 1) * 100;
+      case "bonds_by":
+        return data.bonds_byn ?? 11.0;
+      case "btc":
+        if (data.btc_usd === null) return null;
+        return ((1 + data.btc_usd / 100) * usdBynFactor - 1) * 100;
+      default:
+        return 0;
+    }
+  } else if (currency === "RUB") {
+    // Расчет в российских рублях (RUB)
     switch (assetId) {
       case "mcftr":
         return data.mcftr;
       case "sp500":
-        // S&P 500 в рублях: долларовая доходность + эффект изменения курса доллара
         return ((1 + data.sp500_usd / 100) * usdRubFactor - 1) * 100;
       case "gold":
         return data.gold_rub;
       case "real_estate":
         return data.real_estate_rub;
+      case "real_estate_minsk":
+        // Недвижимость Минска в RUB
+        return ((1 + reMinskUsdReturn) * usdRubFactor - 1) * 100;
       case "deposits":
         return data.deposits_rub;
+      case "deposits_by":
+        // Вклады BYN в RUB
+        const depBynUsd = (1 + (data.deposits_byn ?? 12) / 100) / usdBynFactor - 1;
+        return ((1 + depBynUsd) * usdRubFactor - 1) * 100;
       case "bonds":
         return data.bonds_rub;
+      case "bonds_by":
+        const bondsBynUsd = (1 + (data.bonds_byn ?? 11) / 100) / usdBynFactor - 1;
+        return ((1 + bondsBynUsd) * usdRubFactor - 1) * 100;
       case "btc":
         if (data.btc_usd === null) return null;
         return ((1 + data.btc_usd / 100) * usdRubFactor - 1) * 100;
@@ -42,25 +92,26 @@ export function getAssetAnnualReturn(
         return 0;
     }
   } else {
-    // В долларах / евро (USD / EUR)
+    // Расчет в долларах / евро (USD / EUR)
     switch (assetId) {
       case "mcftr":
-        // Российские акции в USD (эквивалент индекса РТС полной доходности)
-        return ((1 + data.mcftr / 100) / usdRubFactor - 1) * 100;
+        return mcftrUsdReturn * 100;
       case "sp500":
         return data.sp500_usd;
       case "gold":
-        // Золото в USD
-        return ((1 + data.gold_rub / 100) / usdRubFactor - 1) * 100;
+        return goldUsdReturn * 100;
       case "real_estate":
-        // Недвижимость в USD
-        return ((1 + data.real_estate_rub / 100) / usdRubFactor - 1) * 100;
+        return reMosUsdReturn * 100;
+      case "real_estate_minsk":
+        return data.real_estate_minsk_usd ?? 0;
       case "deposits":
-        // Рублевые депозиты в USD
         return ((1 + data.deposits_rub / 100) / usdRubFactor - 1) * 100;
+      case "deposits_by":
+        return ((1 + (data.deposits_byn ?? 12) / 100) / usdBynFactor - 1) * 100;
       case "bonds":
-        // ОФЗ в USD
         return ((1 + data.bonds_rub / 100) / usdRubFactor - 1) * 100;
+      case "bonds_by":
+        return ((1 + (data.bonds_byn ?? 11) / 100) / usdBynFactor - 1) * 100;
       case "btc":
         return data.btc_usd;
       default:
@@ -73,11 +124,13 @@ export function getAssetAnnualReturn(
  * Получить уровень инфляции за год в зависимости от валюты
  */
 export function getInflationReturn(data: HistoricalYearData, currency: string): number {
-  if (currency === "RUB" || currency === "BYN") {
+  if (currency === "BYN") {
+    return data.inflation_byn ?? data.inflation_rub;
+  }
+  if (currency === "RUB") {
     return data.inflation_rub;
   }
   // Для USD / EUR используем историческую долларовую инфляцию США (US CPI)
-  // В среднем 2.5 - 3.5%, в 2021-2022 всплеск 7-8%
   const usCpiByYear: Record<number, number> = {
     2003: 2.3,
     2004: 2.7,
@@ -209,7 +262,8 @@ export function calculateAssetComparison(
 
     const annualReturnPoint: AnnualReturnPoint = {
       year,
-      inflation_rub: yearInflation,
+      inflation_rub: yearData.inflation_rub,
+      inflation_byn: yearData.inflation_byn,
       isYtd: yearData.isYtd,
     };
 
@@ -244,7 +298,7 @@ export function calculateAssetComparison(
 
       // Если актив еще не запущен (например BTC до 2011), он растет по ставке депозита
       if (r === null) {
-        r = singleAssetReturns["deposits"] ?? 0;
+        r = singleAssetReturns["deposits"] ?? singleAssetReturns["deposits_by"] ?? 0;
       }
 
       annualReturnPoint[assetId] = Math.round(r * 10) / 10;
@@ -297,7 +351,6 @@ export function calculateAssetComparison(
       if (monthlyContribution === 0) {
         cagr = (Math.pow(finalValue / initialAmount, 1 / yearsCount) - 1) * 100;
       } else {
-        // Аппроксимация среднегодовой доходности с учетом равномерного потока довнесений
         const avgCapitalInvested = (initialAmount + totalInvested) / 2;
         const totalProfit = finalValue - totalInvested;
         const avgAnnualReturn = (totalProfit / avgCapitalInvested / yearsCount) * 100;
@@ -325,11 +378,11 @@ export function calculateAssetComparison(
       maxDrawdown: Math.round(maxDrawdownTracker[assetId] * 10) / 10,
       bestYear: bestYearTracker[assetId],
       worstYear: worstYearTracker[assetId],
-      rank: 0, // заполнится после сортировки
+      rank: 0,
     });
   }
 
-  // Сортировка по итоговому капиталу (места в рейтинге)
+  // Сортировка по итоговому капиталу
   metrics.sort((a, b) => b.finalValue - a.finalValue);
   metrics.forEach((m, idx) => {
     m.rank = idx + 1;

@@ -30,7 +30,9 @@ export function AssetComparisonCalculator() {
       monthlyContribution: 0,
       startYear: 2003,
       endYear: MAX_HISTORICAL_YEAR,
-      selectedAssets: ["mcftr", "sp500", "gold", "real_estate", "deposits", "bonds"],
+      selectedAssets: isByn
+        ? ["real_estate_minsk", "deposits_by", "gold", "sp500", "mcftr", "bonds_by"]
+        : ["mcftr", "sp500", "gold", "real_estate", "deposits", "bonds"],
       currency,
       adjustForInflation: false,
       scaleType: "linear",
@@ -38,20 +40,30 @@ export function AssetComparisonCalculator() {
     };
   });
 
-  // Track previous currency to rescale monetary amounts when currency changes
+  // Track previous currency to rescale monetary amounts and adapt basket when currency changes
   const [prevCurrency, setPrevCurrency] = useState(currency);
 
   useEffect(() => {
     if (currency !== prevCurrency) {
-      setInputs((prev) => ({
-        ...prev,
-        currency,
-        initialAmount: convertCurrencyValue(prev.initialAmount, prevCurrency, currency),
-        monthlyContribution:
-          prev.monthlyContribution > 0
-            ? convertCurrencyValue(prev.monthlyContribution, prevCurrency, currency)
-            : 0,
-      }));
+      setInputs((prev) => {
+        let nextSelected = prev.selectedAssets;
+        if (currency === "BYN" && prevCurrency === "RUB") {
+          nextSelected = ["real_estate_minsk", "deposits_by", "gold", "sp500", "mcftr", "bonds_by"];
+        } else if (currency === "RUB" && prevCurrency === "BYN") {
+          nextSelected = ["mcftr", "sp500", "gold", "real_estate", "deposits", "bonds"];
+        }
+
+        return {
+          ...prev,
+          currency,
+          selectedAssets: nextSelected,
+          initialAmount: convertCurrencyValue(prev.initialAmount, prevCurrency, currency),
+          monthlyContribution:
+            prev.monthlyContribution > 0
+              ? convertCurrencyValue(prev.monthlyContribution, prevCurrency, currency)
+              : 0,
+        };
+      });
       setPrevCurrency(currency);
     }
   }, [currency, prevCurrency]);
@@ -114,8 +126,9 @@ export function AssetComparisonCalculator() {
             <p className="text-xs sm:text-sm text-blue-100/90 leading-relaxed">
               Наглядный финансовый инструмент с автоматическим обновлением котировок, показывающий, как
               вели бы себя инвестиции в акции РФ с дивидендами (MCFTR), американские акции (S&P 500 TR),
-              физическое золото, московскую недвижимость, банковские вклады, ОФЗ и биткоин с 2003 по
-              текущий момент в реальном времени.
+              физическое золото (ЦБ РФ / НБРБ), недвижимость Москвы (IRN) и Минска (Realt.by), банковские
+              вклады (РФ / РБ), гособлигации (ОФЗ / Минфин РБ) и биткоин с 2003 по {MAX_HISTORICAL_YEAR} год
+              в реальном времени.
             </p>
           </div>
 
@@ -164,7 +177,8 @@ export function AssetComparisonCalculator() {
         <div className="max-w-[1840px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10">
           <p>
             Исторические данные и котировки в реальном времени сформированы по официальным API
-            Московской биржи (MOEX ISS), Банка России (ЦБ РФ), Росстата, IRN.RU и SlickCharts (2003–
+            Московской биржи (MOEX ISS), Банка России (ЦБ РФ), Национального банка Республики Беларусь (НБРБ),
+            Росстата, Белстата, аналитического центра IRN.RU, портала Realt.by и Binance (2003–
             {MAX_HISTORICAL_YEAR} гг.).
           </p>
           <p className="mt-1 text-[11px] text-slate-400">

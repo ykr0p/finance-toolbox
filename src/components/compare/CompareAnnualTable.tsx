@@ -33,9 +33,11 @@ export function CompareAnnualTable({
     const rows = result.annualReturns.map((ar, idx) => {
       // Find corresponding chartPoint
       const cp = result.chartPoints.find((p) => p.year === ar.year);
+      const yearInflation =
+        currency === "BYN" ? ar.inflation_byn ?? ar.inflation_rub : ar.inflation_rub;
       const rowData = [
         ar.year,
-        ar.inflation_rub,
+        yearInflation,
         cp?.totalInvested ?? "",
         ...result.metrics.map((m) =>
           mode === "returns" ? ar[m.assetId] ?? "" : cp?.[m.assetId] ?? ""
@@ -170,7 +172,13 @@ export function CompareAnnualTable({
                     </span>
                   </td>
                   <td className="py-2 px-3 text-right tabular-nums text-slate-500 whitespace-nowrap">
-                    {ar.inflation_rub > 0 ? `+${ar.inflation_rub}%` : `${ar.inflation_rub}%`}
+                    {(() => {
+                      const inf =
+                        currency === "BYN"
+                          ? ar.inflation_byn ?? ar.inflation_rub
+                          : ar.inflation_rub;
+                      return inf > 0 ? `+${inf}%` : `${inf}%`;
+                    })()}
                   </td>
 
                   {mode === "capital" && (

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import {
   TrendingUp,
   Globe,
@@ -18,6 +18,9 @@ import {
   Check,
   RefreshCw,
   Radio,
+  Layers,
+  ChevronDown,
+  Info,
 } from "lucide-react";
 import { AssetId, CompareInputs } from "@/types/compare";
 import { CurrencyCode, CURRENCY_CONFIGS } from "@/types/fire";
@@ -38,11 +41,23 @@ const ASSET_ICONS: Record<AssetId, React.ElementType> = {
   sp500: Globe,
   gold: Coins,
   real_estate: Building2,
+  real_estate_minsk: Building2,
   deposits: Landmark,
+  deposits_by: Landmark,
   bonds: Scroll,
+  bonds_by: Scroll,
   btc: Cpu,
   portfolio: PieChart,
 };
+
+const COUNTRY_BADGES: Record<string, { label: string; flag: string; bg: string; text: string }> = {
+  ru: { label: "РФ", flag: "🇷🇺", bg: "bg-red-50", text: "text-red-700" },
+  by: { label: "РБ", flag: "🇧🇾", bg: "bg-emerald-50", text: "text-emerald-700" },
+  us: { label: "США", flag: "🇺🇸", bg: "bg-blue-50", text: "text-blue-700" },
+  global: { label: "Глобал", flag: "🌐", bg: "bg-purple-50", text: "text-purple-700" },
+};
+
+type AssetFilter = "all" | "ru" | "by" | "global";
 
 export function CompareInputPanel({
   inputs,
@@ -55,6 +70,9 @@ export function CompareInputPanel({
 }: CompareInputPanelProps) {
   const currencyConfig = CURRENCY_CONFIGS[currency] ?? CURRENCY_CONFIGS.RUB;
   const symbol = currencyConfig.symbol;
+
+  const [activeFilter, setActiveFilter] = useState<AssetFilter>("all");
+  const [showSourcesTooltip, setShowSourcesTooltip] = useState(false);
 
   const handleAssetToggle = (assetId: AssetId) => {
     const isSelected = inputs.selectedAssets.includes(assetId);
@@ -71,15 +89,47 @@ export function CompareInputPanel({
   const selectAllAssets = () => {
     onChange({
       ...inputs,
-      selectedAssets: ["mcftr", "sp500", "gold", "real_estate", "deposits", "bonds", "btc"],
+      selectedAssets: [
+        "mcftr",
+        "sp500",
+        "gold",
+        "real_estate",
+        "real_estate_minsk",
+        "deposits",
+        "deposits_by",
+        "bonds",
+        "bonds_by",
+        "btc",
+      ],
+    });
+  };
+
+  const selectRuBasket = () => {
+    onChange({
+      ...inputs,
+      selectedAssets: ["mcftr", "gold", "real_estate", "deposits", "bonds"],
+    });
+  };
+
+  const selectByBasket = () => {
+    onChange({
+      ...inputs,
+      selectedAssets: ["real_estate_minsk", "deposits_by", "gold", "sp500", "bonds_by"],
     });
   };
 
   const selectTop3 = () => {
-    onChange({
-      ...inputs,
-      selectedAssets: ["mcftr", "gold", "real_estate"],
-    });
+    if (currency === "BYN") {
+      onChange({
+        ...inputs,
+        selectedAssets: ["real_estate_minsk", "gold", "deposits_by"],
+      });
+    } else {
+      onChange({
+        ...inputs,
+        selectedAssets: ["mcftr", "gold", "real_estate"],
+      });
+    }
   };
 
   const selectPresetPeriod = (start: number, end: number) => {
@@ -106,10 +156,22 @@ export function CompareInputPanel({
     "sp500",
     "gold",
     "real_estate",
+    "real_estate_minsk",
     "deposits",
+    "deposits_by",
     "bonds",
+    "bonds_by",
     "btc",
   ];
+
+  const filteredAssets = allAvailableAssets.filter((assetId) => {
+    if (activeFilter === "all") return true;
+    const def = ASSET_DEFINITIONS[assetId];
+    if (activeFilter === "ru") return def.country === "ru";
+    if (activeFilter === "by") return def.country === "by";
+    if (activeFilter === "global") return def.country === "us" || def.country === "global";
+    return true;
+  });
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-4 sm:p-5 space-y-6">
@@ -128,15 +190,54 @@ export function CompareInputPanel({
           </div>
         </div>
 
-        {/* Live Auto-update Status Badge */}
-        <div className="flex items-center gap-2 self-start sm:self-auto">
-          <span
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/70"
-            title={lastOnlineUpdate ? `Обновлено: ${new Date(lastOnlineUpdate).toLocaleTimeString()}` : "Котировки Мосбиржи и ЦБ РФ подключены"}
+        {/* Live Auto-update Status Badge with Source List Popup */}
+        <div className="relative flex items-center gap-2 self-start sm:self-auto">
+          <button
+            type="button"
+            onClick={() => setShowSourcesTooltip((prev) => !prev)}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 hover:bg-emerald-100/80 text-emerald-700 border border-emerald-200/70 transition cursor-pointer"
+            title="Нажмите, чтобы посмотреть статус источников котировок"
           >
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
             <span>Онлайн (2026 YTD)</span>
-          </span>
+            <ChevronDown className="w-3 h-3 text-emerald-600" />
+          </button>
+
+          {showSourcesTooltip && (
+            <div className="absolute right-0 top-8 z-30 w-72 p-3 bg-white rounded-xl shadow-xl border border-slate-200 text-xs text-slate-700 space-y-2">
+              <div className="font-bold text-slate-900 flex items-center justify-between border-b pb-1.5">
+                <span>Источники в реальном времени</span>
+                <span className="text-[10px] text-emerald-600 font-semibold">Все онлайн</span>
+              </div>
+              <ul className="space-y-1.5 text-[11px]">
+                <li className="flex items-center justify-between">
+                  <span>🇷🇺 Мосбиржа (MOEX ISS): MCFTR, RGBITR</span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                </li>
+                <li className="flex items-center justify-between">
+                  <span>🇷🇺 Банк России (ЦБ РФ): USD/RUB, Золото</span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                </li>
+                <li className="flex items-center justify-between">
+                  <span>🇧🇾 Нацбанк РБ (НБРБ): USD/BYN, Золото BYN</span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                </li>
+                <li className="flex items-center justify-between">
+                  <span>🏢 Недвижимость: Москва (IRN), Минск (Realt)</span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                </li>
+                <li className="flex items-center justify-between">
+                  <span>🪙 Криптобиржи (Binance): BTC/USDT</span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                </li>
+              </ul>
+              {lastOnlineUpdate && (
+                <p className="text-[10px] text-slate-400 pt-1 border-t">
+                  Последнее обновление: {new Date(lastOnlineUpdate).toLocaleTimeString()}
+                </p>
+              )}
+            </div>
+          )}
 
           {onRefreshOnline && (
             <button
@@ -370,19 +471,35 @@ export function CompareInputPanel({
         </div>
       </div>
 
-      {/* 3. Выбор классов активов */}
-      <div className="space-y-2.5 pt-2 border-t border-slate-100">
-        <div className="flex items-center justify-between">
+      {/* 3. Выбор классов активов с фильтрами по странам */}
+      <div className="space-y-3 pt-2 border-t border-slate-100">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <label className="text-xs font-semibold text-slate-700">
-            Сравниваемые активы ({inputs.selectedAssets.length})
+            Сравниваемые активы ({inputs.selectedAssets.length} из {allAvailableAssets.length})
           </label>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <button
               type="button"
               onClick={selectAllAssets}
               className="text-[11px] text-blue-600 hover:text-blue-700 font-semibold transition"
             >
-              Выбрать все
+              Все
+            </button>
+            <span className="text-slate-300">•</span>
+            <button
+              type="button"
+              onClick={selectRuBasket}
+              className="text-[11px] text-slate-600 hover:text-slate-800 font-medium transition"
+            >
+              РФ 🇷🇺
+            </button>
+            <span className="text-slate-300">•</span>
+            <button
+              type="button"
+              onClick={selectByBasket}
+              className="text-[11px] text-slate-600 hover:text-slate-800 font-medium transition"
+            >
+              РБ 🇧🇾
             </button>
             <span className="text-slate-300">•</span>
             <button
@@ -395,11 +512,61 @@ export function CompareInputPanel({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          {allAvailableAssets.map((assetId) => {
+        {/* Country filter tabs */}
+        <div className="flex items-center gap-1 p-1 bg-slate-100/90 rounded-xl border border-slate-200">
+          <button
+            type="button"
+            onClick={() => setActiveFilter("all")}
+            className={`flex-1 text-[11px] py-1 rounded-lg font-semibold transition ${
+              activeFilter === "all"
+                ? "bg-white text-slate-900 shadow-xs"
+                : "text-slate-600 hover:text-slate-900"
+            }`}
+          >
+            Все ({allAvailableAssets.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveFilter("ru")}
+            className={`flex-1 text-[11px] py-1 rounded-lg font-semibold transition flex items-center justify-center gap-1 ${
+              activeFilter === "ru"
+                ? "bg-white text-slate-900 shadow-xs"
+                : "text-slate-600 hover:text-slate-900"
+            }`}
+          >
+            <span>🇷🇺 РФ</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveFilter("by")}
+            className={`flex-1 text-[11px] py-1 rounded-lg font-semibold transition flex items-center justify-center gap-1 ${
+              activeFilter === "by"
+                ? "bg-white text-slate-900 shadow-xs"
+                : "text-slate-600 hover:text-slate-900"
+            }`}
+          >
+            <span>🇧🇾 РБ</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveFilter("global")}
+            className={`flex-1 text-[11px] py-1 rounded-lg font-semibold transition flex items-center justify-center gap-1 ${
+              activeFilter === "global"
+                ? "bg-white text-slate-900 shadow-xs"
+                : "text-slate-600 hover:text-slate-900"
+            }`}
+          >
+            <span>🌐 Мировые</span>
+          </button>
+        </div>
+
+        {/* Asset Cards Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[380px] overflow-y-auto pr-0.5">
+          {filteredAssets.map((assetId) => {
             const def = ASSET_DEFINITIONS[assetId];
             const isChecked = inputs.selectedAssets.includes(assetId);
             const Icon = ASSET_ICONS[assetId] ?? TrendingUp;
+            const countryBadge = def.country ? COUNTRY_BADGES[def.country] : null;
 
             return (
               <button
@@ -421,9 +588,18 @@ export function CompareInputPanel({
                     <Icon className="w-3.5 h-3.5" />
                   </div>
                   <div className="min-w-0">
-                    <span className="text-xs font-bold text-slate-900 block truncate">
-                      {def.name}
-                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs font-bold text-slate-900 block truncate">
+                        {def.name}
+                      </span>
+                      {countryBadge && (
+                        <span
+                          className={`text-[9px] font-bold px-1.5 py-0.2 rounded shrink-0 ${countryBadge.bg} ${countryBadge.text}`}
+                        >
+                          {countryBadge.flag}
+                        </span>
+                      )}
+                    </div>
                     <span className="text-[10px] text-slate-400 block truncate">
                       {def.description}
                     </span>

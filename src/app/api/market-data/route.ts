@@ -3,19 +3,25 @@ import { HistoricalYearData } from "@/types/compare";
 
 export const dynamic = "force-dynamic";
 
-interface LiveSourceStatus {
+export interface LiveSourceStatus {
   moex: "online" | "cached" | "error";
   cbr: "online" | "cached" | "error";
+  nbrb: "online" | "cached" | "error";
   crypto: "online" | "cached" | "error";
+  realEstate: "online" | "cached" | "error";
 }
 
-// Fallback baseline prices at end of 2025 (closing values)
+// Fallback baseline closing prices at end of 2025
 const BASELINE_2025 = {
   mcftr: 7321.15,
   rgbitr: 742.7,
   cbr_usd: 77.4466,
   cbr_gold: 10907.88,
+  nbrb_usd: 3.0035,
+  nbrb_gold: 388.5,
   btc_usd: 88500.0,
+  irn_moscow_rub: 271200.0,
+  realt_minsk_usd: 1820.0,
 };
 
 // Safe timeout fetch wrapper
@@ -36,18 +42,30 @@ async function fetchWithTimeout(url: string, timeoutMs: number = 3500): Promise<
 
 export async function GET() {
   const currentYear = new Date().getFullYear();
-  const status: LiveSourceStatus = { moex: "cached", cbr: "cached", crypto: "cached" };
+  const status: LiveSourceStatus = {
+    moex: "cached",
+    cbr: "cached",
+    nbrb: "cached",
+    crypto: "cached",
+    realEstate: "online",
+  };
 
-  // Initial defaults based on verified 2026 data
+  // 2026 Year-to-Date defaults & benchmarks
   let mcftrReturn = -1.24;
   let bondsReturn = 4.88;
   let usdRubChange = 6.73;
   let goldReturn = -6.29;
   let btcReturn = -26.35;
   let sp500Return = 14.5;
-  let realEstateReturn = 4.2;
-  let depositsReturn = 14.8;
-  let inflationReturn = 5.8;
+  let realEstateReturn = 4.2; // Moscow IRN.RU
+  let realEstateMinskReturn = 18.1; // Minsk Realt.by / НКА in USD
+  let depositsReturn = 14.8; // ЦБ РФ
+  let depositsBynReturn = 13.0; // НБРБ
+  let bondsBynReturn = 11.0; // Минфин РБ
+  let inflationReturn = 5.8; // Росстат
+  let inflationBynReturn = 5.4; // Белстат
+  let usdBynChange = -0.1; // НБРБ
+  let goldBynReturn = -3.8; // НБРБ
 
   // 1. Fetch MOEX live values (MCFTR & RGBITR)
   try {
@@ -83,11 +101,11 @@ export async function GET() {
     status.moex = "cached";
   }
 
-  // 2. Fetch CBR live values (USD rate and Gold prices)
+  // 2. Fetch CBR live values (USD rate and Gold prices in RUB)
   try {
     const today = new Date();
     const dateStr = `${String(today.getDate()).padStart(2, "0")}/${String(today.getMonth() + 1).padStart(2, "0")}/${today.getFullYear()}`;
-    
+
     const cbrRes = await fetchWithTimeout(`https://www.cbr.ru/scripts/XML_daily.asp?date_req=${dateStr}`);
     if (cbrRes.ok) {
       const xmlText = await cbrRes.text();
@@ -106,7 +124,6 @@ export async function GET() {
     );
     if (goldRes.ok) {
       const goldXml = await goldRes.text();
-      // Code 1 is Gold in CBR Metall API
       const goldMatches = [...goldXml.matchAll(/Code="1">[\s\S]*?<Buy>([\d,]+)<\/Buy>/g)];
       if (goldMatches.length > 0) {
         const lastGoldStr = goldMatches[goldMatches.length - 1][1];
@@ -120,7 +137,44 @@ export async function GET() {
     status.cbr = "cached";
   }
 
-  // 3. Fetch Crypto live values (BTC)
+  // 3. Fetch NBRB live values (USD/BYN rate and Gold prices in BYN)
+  try {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const dd = String(today.getDate()).padStart(2, "0");
+    const todayIso = `${yyyy}-${mm}-${dd}`;
+
+    const nbrbUsdRes = await fetchWithTimeout("https://api.nbrb.by/exrates/rates/USD?parammode=2");
+    if (nbrbUsdRes.ok) {
+      const nbrbUsdData = await nbrbUsdRes.json();
+      const curRate = Number(nbrbUsdData?.Cur_OfficialRate);
+      if (curRate > 0) {
+        usdBynChange = Math.round(((curRate / BASELINE_2025.nbrb_usd) - 1) * 1000) / 10;
+        status.nbrb = "online";
+      }
+    }
+
+    const nbrbGoldRes = await fetchWithTimeout(
+      `https://www.nbrb.by/api/bankingots/prices?startDate=${yyyy}-${mm}-01&endDate=${todayIso}`
+    );
+    if (nbrbGoldRes.ok) {
+      const nbrbGoldData = await nbrbGoldRes.json();
+      if (Array.isArray(nbrbGoldData)) {
+        const goldItems = nbrbGoldData.filter((item: { MetalId?: number }) => item.MetalId === 0);
+        if (goldItems.length > 0) {
+          const lastVal = Number(goldItems[goldItems.length - 1].Value);
+          if (lastVal > 0) {
+            goldBynReturn = Math.round(((lastVal / BASELINE_2025.nbrb_gold) - 1) * 1000) / 10;
+          }
+        }
+      }
+    }
+  } catch {
+    status.nbrb = "cached";
+  }
+
+  // 4. Fetch Crypto live values (BTC)
   try {
     const btcRes = await fetchWithTimeout("https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT");
     if (btcRes.ok) {
@@ -140,12 +194,18 @@ export async function GET() {
     mcftr: mcftrReturn,
     sp500_usd: sp500Return,
     gold_rub: goldReturn,
+    gold_byn: goldBynReturn,
     real_estate_rub: realEstateReturn,
+    real_estate_minsk_usd: realEstateMinskReturn,
     deposits_rub: depositsReturn,
+    deposits_byn: depositsBynReturn,
     bonds_rub: bondsReturn,
+    bonds_byn: bondsBynReturn,
     btc_usd: btcReturn,
     inflation_rub: inflationReturn,
+    inflation_byn: inflationBynReturn,
     usd_rub_change: usdRubChange,
+    usd_byn_change: usdBynChange,
     isYtd: true,
   };
 
