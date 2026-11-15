@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   CalculatorMode,
   SimpleFireInputs,
@@ -11,6 +11,7 @@ import {
 } from "@/types/fire";
 import { calculateFIRE } from "@/lib/calculator";
 import { convertCurrencyValue } from "@/lib/formatters";
+import { useCurrency } from "@/context/CurrencyContext";
 import { Header } from "./Header";
 import { Tabs } from "./Tabs";
 import { InputForm } from "./InputForm";
@@ -49,31 +50,52 @@ const DEFAULT_FLEXIBLE_INPUTS: FlexibleFireInputs = {
 
 export function FireCalculator() {
   const [mode, setMode] = useState<CalculatorMode>("simple");
-  const [currency, setCurrency] = useState<CurrencyCode>("RUB");
-  const [simpleInputs, setSimpleInputs] = useState<SimpleFireInputs>(DEFAULT_SIMPLE_INPUTS);
-  const [flexibleInputs, setFlexibleInputs] = useState<FlexibleFireInputs>(DEFAULT_FLEXIBLE_INPUTS);
+  const { currency, setCurrency } = useCurrency();
+  const [prevCurrency, setPrevCurrency] = useState<CurrencyCode>(currency);
+  const [simpleInputs, setSimpleInputs] = useState<SimpleFireInputs>(() => {
+    const cfg = CURRENCY_CONFIGS[currency] ?? CURRENCY_CONFIGS.RUB;
+    return {
+      ...DEFAULT_SIMPLE_INPUTS,
+      monthly_income: cfg.defaultMonthlyIncome,
+      monthly_expenses: cfg.defaultMonthlyExpenses,
+      current_assets: cfg.defaultAssets,
+    };
+  });
+  const [flexibleInputs, setFlexibleInputs] = useState<FlexibleFireInputs>(() => {
+    const cfg = CURRENCY_CONFIGS[currency] ?? CURRENCY_CONFIGS.RUB;
+    return {
+      ...DEFAULT_FLEXIBLE_INPUTS,
+      monthly_income: cfg.defaultMonthlyIncome,
+      monthly_expenses: cfg.defaultMonthlyExpenses,
+      current_assets: cfg.defaultAssets,
+    };
+  });
 
   // Currency switch handler with automatic smart scaling of monetary amounts
+  useEffect(() => {
+    if (currency !== prevCurrency) {
+      setSimpleInputs((prev) => ({
+        ...prev,
+        monthly_income: convertCurrencyValue(prev.monthly_income, prevCurrency, currency),
+        monthly_expenses: convertCurrencyValue(prev.monthly_expenses, prevCurrency, currency),
+        current_assets: convertCurrencyValue(prev.current_assets, prevCurrency, currency),
+        liabilities_value: convertCurrencyValue(prev.liabilities_value, prevCurrency, currency),
+      }));
+
+      setFlexibleInputs((prev) => ({
+        ...prev,
+        monthly_income: convertCurrencyValue(prev.monthly_income, prevCurrency, currency),
+        monthly_expenses: convertCurrencyValue(prev.monthly_expenses, prevCurrency, currency),
+        current_assets: convertCurrencyValue(prev.current_assets, prevCurrency, currency),
+        liabilities_value: convertCurrencyValue(prev.liabilities_value, prevCurrency, currency),
+        short_term_debts: convertCurrencyValue(prev.short_term_debts, prevCurrency, currency),
+      }));
+
+      setPrevCurrency(currency);
+    }
+  }, [currency, prevCurrency]);
+
   const handleCurrencyChange = (newCurrency: CurrencyCode) => {
-    if (newCurrency === currency) return;
-
-    setSimpleInputs((prev) => ({
-      ...prev,
-      monthly_income: convertCurrencyValue(prev.monthly_income, currency, newCurrency),
-      monthly_expenses: convertCurrencyValue(prev.monthly_expenses, currency, newCurrency),
-      current_assets: convertCurrencyValue(prev.current_assets, currency, newCurrency),
-      liabilities_value: convertCurrencyValue(prev.liabilities_value, currency, newCurrency),
-    }));
-
-    setFlexibleInputs((prev) => ({
-      ...prev,
-      monthly_income: convertCurrencyValue(prev.monthly_income, currency, newCurrency),
-      monthly_expenses: convertCurrencyValue(prev.monthly_expenses, currency, newCurrency),
-      current_assets: convertCurrencyValue(prev.current_assets, currency, newCurrency),
-      liabilities_value: convertCurrencyValue(prev.liabilities_value, currency, newCurrency),
-      short_term_debts: convertCurrencyValue(prev.short_term_debts, currency, newCurrency),
-    }));
-
     setCurrency(newCurrency);
   };
 

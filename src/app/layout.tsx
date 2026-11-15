@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { CurrencyProvider } from "@/context/CurrencyContext";
 
 export const metadata: Metadata = {
-  title: "Калькулятор раннего выхода на пенсию (FIRE)",
-  description: "Калькулятор раннего выхода на пенсию (FIRE). Простая и гибкая симуляция роста капитала и финансовой независимости.",
+  title: "Финансовые Калькуляторы | FIRE и Сравнение Активов",
+  description: "Интерактивные финансовые калькуляторы: расчет ранней пенсии (FIRE) и историческое сравнение доходности классов активов (акции РФ и США, золото, недвижимость, вклады, ОФЗ, биткоин).",
 };
 
 export default function RootLayout({
@@ -13,8 +14,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ru">
-      <body className="antialiased font-sans text-slate-800">
-        {children}
+      <body className="antialiased font-sans text-slate-800 bg-slate-50">
+        <CurrencyProvider>
+          {children}
+        </CurrencyProvider>
       </body>
     </html>
   );

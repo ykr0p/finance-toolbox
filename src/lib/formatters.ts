@@ -75,6 +75,10 @@ export function formatCurrency(
   }).format(rounded);
 }
 
+export function formatCompactCurrency(value: number, currency: CurrencyCode = "RUB"): string {
+  return formatCurrency(value, currency, { compact: true });
+}
+
 export function formatNumber(value: number, maximumFractionDigits: number = 0): string {
   if (value === null || value === undefined || isNaN(value)) {
     return "0";
