@@ -22,6 +22,7 @@ import { CurrencyCode, CURRENCY_CONFIGS } from "@/types/fire";
 import { PORTFOLIO_PRESETS_CONFIG } from "@/lib/monteCarloCalculator";
 import { HelpButton } from "@/components/common/HelpDialog";
 import { MONTE_CARLO_HELP } from "@/data/parametersHelp";
+import { CalculationTemplatesModal } from "@/components/common/CalculationTemplatesModal";
 
 interface MonteCarloInputPanelProps {
   inputs: MonteCarloInputs;
@@ -72,6 +73,25 @@ export function MonteCarloInputPanel({
     "custom",
   ];
 
+  const handleResetDefaults = () => {
+    const isRub = currency === "RUB";
+    const isByn = currency === "BYN";
+    onChange({
+      initialCapital: isRub ? 5000000 : isByn ? 150000 : 50000,
+      mode: "retirement",
+      years: 30,
+      monthlyCashflow: isRub ? 50000 : isByn ? 1500 : 500,
+      inflationRate: 5.5,
+      adjustCashflowForInflation: true,
+      expectedReturn: 12.0,
+      volatility: 12.5,
+      portfolioPreset: "balanced",
+      simulationCount: 2500,
+      scaleType: "linear",
+      showSamplePaths: true,
+    });
+  };
+
   return (
     <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-4 sm:p-5 space-y-6">
       <div className="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -88,6 +108,14 @@ export function MonteCarloInputPanel({
             </p>
           </div>
         </div>
+        <CalculationTemplatesModal
+          calculatorId="monte-carlo"
+          calculatorTitle="Калькулятор Монте-Карло"
+          currentData={inputs}
+          onLoadData={onChange}
+          currency={currency}
+          onResetDefaults={handleResetDefaults}
+        />
       </div>
 
       {/* 1. Режим симуляции */}

@@ -11,7 +11,9 @@ import {
 } from "@/types/fire";
 import { calculateFIRE } from "@/lib/calculator";
 import { convertCurrencyValue } from "@/lib/formatters";
+import { usePersistentState } from "@/lib/storage";
 import { useCurrency } from "@/context/CurrencyContext";
+import { CalculationTemplatesModal } from "@/components/common/CalculationTemplatesModal";
 import { Header } from "./Header";
 import { Tabs } from "./Tabs";
 import { InputForm } from "./InputForm";
@@ -49,27 +51,33 @@ const DEFAULT_FLEXIBLE_INPUTS: FlexibleFireInputs = {
 };
 
 export function FireCalculator() {
-  const [mode, setMode] = useState<CalculatorMode>("simple");
+  const [mode, setMode] = usePersistentState<CalculatorMode>("fincalc_fire_mode_v1", "simple");
   const { currency, setCurrency } = useCurrency();
   const [prevCurrency, setPrevCurrency] = useState<CurrencyCode>(currency);
-  const [simpleInputs, setSimpleInputs] = useState<SimpleFireInputs>(() => {
-    const cfg = CURRENCY_CONFIGS[currency] ?? CURRENCY_CONFIGS.RUB;
-    return {
-      ...DEFAULT_SIMPLE_INPUTS,
-      monthly_income: cfg.defaultMonthlyIncome,
-      monthly_expenses: cfg.defaultMonthlyExpenses,
-      current_assets: cfg.defaultAssets,
-    };
-  });
-  const [flexibleInputs, setFlexibleInputs] = useState<FlexibleFireInputs>(() => {
-    const cfg = CURRENCY_CONFIGS[currency] ?? CURRENCY_CONFIGS.RUB;
-    return {
-      ...DEFAULT_FLEXIBLE_INPUTS,
-      monthly_income: cfg.defaultMonthlyIncome,
-      monthly_expenses: cfg.defaultMonthlyExpenses,
-      current_assets: cfg.defaultAssets,
-    };
-  });
+  const [simpleInputs, setSimpleInputs] = usePersistentState<SimpleFireInputs>(
+    "fincalc_fire_simple_v1",
+    () => {
+      const cfg = CURRENCY_CONFIGS[currency] ?? CURRENCY_CONFIGS.RUB;
+      return {
+        ...DEFAULT_SIMPLE_INPUTS,
+        monthly_income: cfg.defaultMonthlyIncome,
+        monthly_expenses: cfg.defaultMonthlyExpenses,
+        current_assets: cfg.defaultAssets,
+      };
+    }
+  );
+  const [flexibleInputs, setFlexibleInputs] = usePersistentState<FlexibleFireInputs>(
+    "fincalc_fire_flexible_v1",
+    () => {
+      const cfg = CURRENCY_CONFIGS[currency] ?? CURRENCY_CONFIGS.RUB;
+      return {
+        ...DEFAULT_FLEXIBLE_INPUTS,
+        monthly_income: cfg.defaultMonthlyIncome,
+        monthly_expenses: cfg.defaultMonthlyExpenses,
+        current_assets: cfg.defaultAssets,
+      };
+    }
+  );
 
   // Currency switch handler with automatic smart scaling of monetary amounts
   useEffect(() => {
@@ -219,6 +227,22 @@ export function FireCalculator() {
     }
   };
 
+  const handleResetDefaults = () => {
+    const cfg = CURRENCY_CONFIGS[currency] ?? CURRENCY_CONFIGS.RUB;
+    setSimpleInputs({
+      ...DEFAULT_SIMPLE_INPUTS,
+      monthly_income: cfg.defaultMonthlyIncome,
+      monthly_expenses: cfg.defaultMonthlyExpenses,
+      current_assets: cfg.defaultAssets,
+    });
+    setFlexibleInputs({
+      ...DEFAULT_FLEXIBLE_INPUTS,
+      monthly_income: cfg.defaultMonthlyIncome,
+      monthly_expenses: cfg.defaultMonthlyExpenses,
+      current_assets: cfg.defaultAssets,
+    });
+  };
+
   // Run FIRE simulation (pure TypeScript calculation)
   const calculationResult = useMemo(() => {
     const inputs: FireInputs =
@@ -237,7 +261,26 @@ export function FireCalculator() {
         onChangeCurrency={handleCurrencyChange}
         onSelectPreset={handleSelectPreset}
       />
-      <Tabs mode={mode} onChangeMode={handleModeChange} />
+      <Tabs
+        mode={mode}
+        onChangeMode={handleModeChange}
+        rightSlot={
+          <CalculationTemplatesModal
+            calculatorId="fire"
+            calculatorTitle="Калькулятор FIRE"
+            currentData={mode === "flexible" ? flexibleInputs : simpleInputs}
+            onLoadData={(saved) => {
+              if (mode === "flexible") {
+                setFlexibleInputs(saved as FlexibleFireInputs);
+              } else {
+                setSimpleInputs(saved as SimpleFireInputs);
+              }
+            }}
+            currency={currency}
+            onResetDefaults={handleResetDefaults}
+          />
+        }
+      />
 
       <main
         id="panel-calculator"

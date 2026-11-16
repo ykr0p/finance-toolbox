@@ -6,6 +6,7 @@ import { MonteCarloInputs, MonteCarloResult } from "@/types/monteCarlo";
 import { useCurrency } from "@/context/CurrencyContext";
 import { calculateMonteCarlo } from "@/lib/monteCarloCalculator";
 import { convertCurrencyValue } from "@/lib/formatters";
+import { usePersistentState } from "@/lib/storage";
 import { Navigation } from "@/components/Navigation";
 import { MonteCarloInputPanel } from "./MonteCarloInputPanel";
 import { MonteCarloMetrics } from "./MonteCarloMetrics";
@@ -16,25 +17,28 @@ import { MonteCarloInsights } from "./MonteCarloInsights";
 export function MonteCarloCalculator() {
   const { currency } = useCurrency();
 
-  const [inputs, setInputs] = useState<MonteCarloInputs>(() => {
-    const isRub = currency === "RUB";
-    const isByn = currency === "BYN";
+  const [inputs, setInputs] = usePersistentState<MonteCarloInputs>(
+    "fincalc_montecarlo_inputs_v1",
+    () => {
+      const isRub = currency === "RUB";
+      const isByn = currency === "BYN";
 
-    return {
-      initialCapital: isRub ? 5000000 : isByn ? 150000 : 50000,
-      mode: "retirement",
-      years: 30,
-      monthlyCashflow: isRub ? 50000 : isByn ? 1500 : 500,
-      inflationRate: 5.5,
-      adjustCashflowForInflation: true,
-      expectedReturn: 12.0,
-      volatility: 12.5,
-      portfolioPreset: "balanced",
-      simulationCount: 2500,
-      scaleType: "linear",
-      showSamplePaths: true,
-    };
-  });
+      return {
+        initialCapital: isRub ? 5000000 : isByn ? 150000 : 50000,
+        mode: "retirement",
+        years: 30,
+        monthlyCashflow: isRub ? 50000 : isByn ? 1500 : 500,
+        inflationRate: 5.5,
+        adjustCashflowForInflation: true,
+        expectedReturn: 12.0,
+        volatility: 12.5,
+        portfolioPreset: "balanced",
+        simulationCount: 2500,
+        scaleType: "linear",
+        showSamplePaths: true,
+      };
+    }
+  );
 
   const [prevCurrency, setPrevCurrency] = useState(currency);
 

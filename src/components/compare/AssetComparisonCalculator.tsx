@@ -6,6 +6,7 @@ import { CompareInputs, CompareResult, HistoricalYearData } from "@/types/compar
 import { useCurrency } from "@/context/CurrencyContext";
 import { calculateAssetComparison } from "@/lib/compareCalculator";
 import { convertCurrencyValue } from "@/lib/formatters";
+import { usePersistentState } from "@/lib/storage";
 import { HISTORICAL_DATA, MAX_HISTORICAL_YEAR } from "@/data/historicalReturns";
 import { Navigation } from "@/components/Navigation";
 import { CompareInputPanel } from "./CompareInputPanel";
@@ -21,8 +22,8 @@ export function AssetComparisonCalculator() {
   const [lastOnlineUpdate, setLastOnlineUpdate] = useState<string | undefined>(undefined);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Initial state calibrated to currency
-  const [inputs, setInputs] = useState<CompareInputs>(() => {
+  // Initial state calibrated to currency and persisted in localStorage
+  const [inputs, setInputs] = usePersistentState<CompareInputs>("fincalc_compare_inputs_v1", () => {
     const isRub = currency === "RUB";
     const isByn = currency === "BYN";
     return {

@@ -25,6 +25,7 @@ import {
 import { AssetId, CompareInputs } from "@/types/compare";
 import { CurrencyCode, CURRENCY_CONFIGS } from "@/types/fire";
 import { ASSET_DEFINITIONS, MIN_HISTORICAL_YEAR, MAX_HISTORICAL_YEAR } from "@/data/historicalReturns";
+import { CalculationTemplatesModal } from "@/components/common/CalculationTemplatesModal";
 
 interface CompareInputPanelProps {
   inputs: CompareInputs;
@@ -134,6 +135,24 @@ export function CompareInputPanel({
 
   const selectPresetPeriod = (start: number, end: number) => {
     onChange({ ...inputs, startYear: start, endYear: end });
+  };
+
+  const handleResetDefaults = () => {
+    const isRub = currency === "RUB";
+    const isByn = currency === "BYN";
+    onChange({
+      initialAmount: isRub ? 100000 : isByn ? 3000 : 1000,
+      monthlyContribution: 0,
+      startYear: 2003,
+      endYear: MAX_HISTORICAL_YEAR,
+      selectedAssets: isByn
+        ? ["real_estate_minsk", "deposits_by", "gold", "sp500", "mcftr", "bonds_by"]
+        : ["mcftr", "sp500", "gold", "real_estate", "deposits", "bonds"],
+      currency,
+      adjustForInflation: false,
+      scaleType: "linear",
+      includeBalancedPortfolio: true,
+    });
   };
 
   // Quick preset amounts based on currency
@@ -250,6 +269,15 @@ export function CompareInputPanel({
               <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin text-blue-600" : ""}`} />
             </button>
           )}
+
+          <CalculationTemplatesModal
+            calculatorId="compare"
+            calculatorTitle="Сравнение классов активов"
+            currentData={inputs}
+            onLoadData={onChange}
+            currency={currency}
+            onResetDefaults={handleResetDefaults}
+          />
         </div>
       </div>
 

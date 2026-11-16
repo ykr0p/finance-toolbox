@@ -7,16 +7,18 @@ import { CalculatorMode } from "@/types/fire";
 interface TabsProps {
   mode: CalculatorMode;
   onChangeMode: (mode: CalculatorMode) => void;
+  rightSlot?: React.ReactNode;
 }
 
-export function Tabs({ mode, onChangeMode }: TabsProps) {
+export function Tabs({ mode, onChangeMode, rightSlot }: TabsProps) {
   return (
     <div className="border-b border-slate-200 bg-white">
-      <div
-        role="tablist"
-        aria-label="Режим расчета FIRE"
-        className="flex space-x-2 px-4 sm:px-6 lg:px-8 xl:px-10 max-w-[1840px] mx-auto"
-      >
+      <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 xl:px-10 max-w-[1840px] mx-auto">
+        <div
+          role="tablist"
+          aria-label="Режим расчета FIRE"
+          className="flex space-x-2"
+        >
         <button
           type="button"
           role="tab"
@@ -69,6 +71,8 @@ export function Tabs({ mode, onChangeMode }: TabsProps) {
           )}
         </button>
       </div>
+      {rightSlot && <div className="py-2 pr-1">{rightSlot}</div>}
     </div>
+  </div>
   );
 }
