@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import {
   Bookmark,
   Save,
@@ -39,9 +40,14 @@ export function CalculationTemplatesModal<T>({
   defaultSummary,
 }: CalculationTemplatesModalProps<T>) {
   const [isOpen, setIsOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [templates, setTemplates] = useState<SavedCalculation<T>[]>([]);
   const [newTitle, setNewTitle] = useState("");
   const [saveSuccess, setSaveSuccess] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Refresh templates list
   const refreshList = () => {
@@ -120,9 +126,9 @@ export function CalculationTemplatesModal<T>({
       </button>
 
       {/* Modal Dialog */}
-      {isOpen && (
+      {isOpen && mounted && typeof document !== "undefined" && createPortal(
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200"
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-200"
           onClick={() => setIsOpen(false)}
         >
           <div
@@ -130,7 +136,7 @@ export function CalculationTemplatesModal<T>({
             aria-modal="true"
             aria-labelledby="templates-dialog-title"
             onClick={(e) => e.stopPropagation()}
-            className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-200 max-h-[90vh] flex flex-col"
+            className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-200 max-h-[90vh] flex flex-col z-[10000]"
           >
             {/* Header */}
             <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 px-5 py-4 text-white flex items-center justify-between">
@@ -281,7 +287,8 @@ export function CalculationTemplatesModal<T>({
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );

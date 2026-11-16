@@ -32,6 +32,7 @@ export interface MonteCarloInputs {
   simulationCount: 1000 | 2500 | 5000 | 10000;
   scaleType: "linear" | "log";
   showSamplePaths: boolean; // Отображать случайные нити траекторий
+  seed?: number; // Детерминированный сид для воспроизводимости и устранения гидратации Next.js
 }
 
 export interface PercentilePoint {

@@ -68,14 +68,30 @@ export const PORTFOLIO_PRESETS_CONFIG: Record<PortfolioPreset, PortfolioPresetCo
 };
 
 /**
- * Fast standard normal random variable generator via Box-Muller transform
+ * Fast Mulberry32 32-bit pseudo-random number generator
+ * Given the same seed, returns the identical sequence on server and client.
  */
-function standardNormal(): number {
-  let u = 0;
-  let v = 0;
-  while (u === 0) u = Math.random();
-  while (v === 0) v = Math.random();
-  return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+export function createMulberry32(seed: number) {
+  let s = (seed >>> 0) || 1;
+  return function next(): number {
+    s = (s + 0x6d2b79f5) | 0;
+    let t = Math.imul(s ^ (s >>> 15), 1 | s);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/**
+ * Standard normal random variable generator via Box-Muller transform using PRNG
+ */
+function createNormalGenerator(prng: () => number) {
+  return function standardNormal(): number {
+    let u = 0;
+    let v = 0;
+    while (u === 0) u = prng();
+    while (v === 0) v = prng();
+    return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+  };
 }
 
 /**
@@ -118,6 +134,11 @@ export function calculateMonteCarlo(inputs: MonteCarloInputs): MonteCarloResult 
   const N = simulationCount;
   const T = years;
 
+  // Initialize deterministic PRNG with seed to ensure identical results on SSR and Client
+  const seed = inputs.seed ?? 424242;
+  const prng = createMulberry32(seed);
+  const normalGen = createNormalGenerator(prng);
+
   // trajectories[pathIdx][year]
   const trajectories = new Float64Array(N * (T + 1));
 
@@ -147,13 +168,13 @@ export function calculateMonteCarlo(inputs: MonteCarloInputs): MonteCarloResult 
         continue;
       }
 
-      // Generate annual return
+      // Generate annual return using deterministic PRNG
       let annualReturn: number;
       if (portfolioPreset === "bootstrap" && HISTORICAL_BALANCED_RETURNS.length > 0) {
-        const randIdx = Math.floor(Math.random() * HISTORICAL_BALANCED_RETURNS.length);
+        const randIdx = Math.floor(prng() * HISTORICAL_BALANCED_RETURNS.length);
         annualReturn = HISTORICAL_BALANCED_RETURNS[randIdx] / 100;
       } else {
-        const z = standardNormal();
+        const z = normalGen();
         annualReturn = Math.exp(muDrift + vol * z) - 1;
       }
 
