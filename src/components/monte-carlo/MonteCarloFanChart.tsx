@@ -315,11 +315,6 @@ export function MonteCarloFanChart({
               dot={false}
               isAnimationActive={false}
             />
-              stroke="#818cf8"
-              strokeWidth={1.5}
-              strokeDasharray="2 2"
-              dot={false}
-            />
           </ComposedChart>
         </ResponsiveContainer>
       </div>
