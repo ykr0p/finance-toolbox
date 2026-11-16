@@ -37,47 +37,47 @@ export function MonteCarloFanChart({
     setMounted(true);
   }, []);
 
+  // Determine safe non-zero floor for log scale calculations
+  const logFloor = useMemo(() => {
+    if (currency === "BYN") return 100;
+    if (currency === "RUB") return 10000;
+    return 100; // USD / EUR
+  }, [currency]);
+
   // Transform data for stacked shaded bands in Recharts
-  // Band 1: Base up to p5
-  // Band 2: p5 to p10
-  // Band 3: p10 to p25
-  // Band 4: p25 to p50
-  // Band 5: p50 to p75
-  // Band 6: p75 to p95
   const chartData = useMemo(() => {
     return percentileTrajectory.map((pt) => {
+      const clamp = (val: number) => (scaleType === "log" ? Math.max(logFloor, val) : val);
+
       const point: Record<string, number | number[]> = {
         year: pt.year,
-        p95: pt.p95,
-        p75: pt.p75,
-        p50: pt.p50,
-        p25: pt.p25,
-        p10: pt.p10,
-        p5: pt.p5,
-        // Shading delta layers
-        range90: Math.max(0, pt.p95 - pt.p10),
-        range50: Math.max(0, pt.p75 - pt.p25),
+        // Clamped values for SVG path calculation in Log mode
+        p95: clamp(pt.p95),
+        p75: clamp(pt.p75),
+        p50: clamp(pt.p50),
+        p25: clamp(pt.p25),
+        p10: clamp(pt.p10),
+        p5: clamp(pt.p5),
+
+        // Raw original values for tooltips
+        raw_p95: pt.p95,
+        raw_p75: pt.p75,
+        raw_p50: pt.p50,
+        raw_p25: pt.p25,
+        raw_p10: pt.p10,
+        raw_p5: pt.p5,
       };
 
       if (showSamplePaths && pt.samplePaths) {
         pt.samplePaths.forEach((val, idx) => {
-          point[`sample_${idx}`] = val;
+          point[`sample_${idx}`] = clamp(val);
+          point[`raw_sample_${idx}`] = val;
         });
       }
 
       return point;
     });
-  }, [percentileTrajectory, showSamplePaths]);
-
-  // Find min non-zero value for safe log scale domain
-  const minNonZeroValue = useMemo(() => {
-    let minVal = Infinity;
-    for (const pt of percentileTrajectory) {
-      if (pt.p50 > 0 && pt.p50 < minVal) minVal = pt.p50;
-      if (pt.p10 > 0 && pt.p10 < minVal) minVal = pt.p10;
-    }
-    return minVal === Infinity ? 1 : Math.max(1, minVal * 0.5);
-  }, [percentileTrajectory]);
+  }, [percentileTrajectory, showSamplePaths, scaleType, logFloor]);
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-4 sm:p-5 flex flex-col space-y-3">
@@ -150,12 +150,18 @@ export function MonteCarloFanChart({
             />
             <YAxis
               scale={scaleType === "log" ? "log" : "linear"}
-              domain={scaleType === "log" ? [minNonZeroValue, "auto"] : [0, "auto"]}
+              domain={scaleType === "log" ? [logFloor, "auto"] : [0, "auto"]}
+              allowDataOverflow={true}
               stroke="#94a3b8"
               fontSize={11}
               tickLine={false}
               axisLine={{ stroke: "#e2e8f0" }}
-              tickFormatter={(v) => formatCompactCurrency(v, currency)}
+              tickFormatter={(v) => {
+                if (scaleType === "log" && v <= logFloor) {
+                  return "0";
+                }
+                return formatCompactCurrency(v, currency);
+              }}
             />
             <Tooltip
               content={({ active, payload, label }) => {
@@ -178,7 +184,7 @@ export function MonteCarloFanChart({
                           <span className="w-2 h-2 rounded-full bg-indigo-300" />
                           Оптимистичный (95%):
                         </span>
-                        <span className="font-extrabold">{formatCurrency(d.p95, currency)}</span>
+                        <span className="font-extrabold">{formatCurrency(d.raw_p95 ?? d.p95, currency)}</span>
                       </div>
 
                       <div className="flex items-center justify-between text-indigo-700">
@@ -186,7 +192,7 @@ export function MonteCarloFanChart({
                           <span className="w-2 h-2 rounded-full bg-indigo-400" />
                           Верхний квантиль (75%):
                         </span>
-                        <span className="font-bold">{formatCurrency(d.p75, currency)}</span>
+                        <span className="font-bold">{formatCurrency(d.raw_p75 ?? d.p75, currency)}</span>
                       </div>
 
                       <div className="flex items-center justify-between text-teal-800 font-bold bg-teal-50/70 p-1 rounded-md">
@@ -194,7 +200,11 @@ export function MonteCarloFanChart({
                           <span className="w-2 h-2 rounded-full bg-teal-600" />
                           Медиана (50%):
                         </span>
-                        <span className="font-black text-sm">{formatCurrency(d.p50, currency)}</span>
+                        <span className="font-black text-sm">
+                          {(d.raw_p50 ?? d.p50) <= 0
+                            ? "0 (Исчерпан)"
+                            : formatCurrency(d.raw_p50 ?? d.p50, currency)}
+                        </span>
                       </div>
 
                       <div className="flex items-center justify-between text-slate-700">
@@ -202,7 +212,11 @@ export function MonteCarloFanChart({
                           <span className="w-2 h-2 rounded-full bg-slate-400" />
                           Нижний квантиль (25%):
                         </span>
-                        <span className="font-bold">{formatCurrency(d.p25, currency)}</span>
+                        <span className="font-bold">
+                          {(d.raw_p25 ?? d.p25) <= 0
+                            ? "0 (Исчерпан)"
+                            : formatCurrency(d.raw_p25 ?? d.p25, currency)}
+                        </span>
                       </div>
 
                       <div className="flex items-center justify-between text-rose-700 font-semibold border-t border-slate-100 pt-1">
@@ -210,7 +224,11 @@ export function MonteCarloFanChart({
                           <span className="w-2 h-2 rounded-full bg-rose-500" />
                           Стресс (10%):
                         </span>
-                        <span className="font-extrabold">{formatCurrency(d.p10, currency)}</span>
+                        <span className="font-extrabold">
+                          {(d.raw_p10 ?? d.p10) <= 0
+                            ? "0 (Исчерпан)"
+                            : formatCurrency(d.raw_p10 ?? d.p10, currency)}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -222,27 +240,33 @@ export function MonteCarloFanChart({
             <Area
               type="monotone"
               dataKey="p95"
+              baseValue={scaleType === "log" ? logFloor : 0}
               stroke="none"
               fill="#6366f1"
               fillOpacity={0.12}
+              isAnimationActive={false}
             />
 
             {/* Shaded Area: Inner Band (p25 to p75) */}
             <Area
               type="monotone"
               dataKey="p75"
+              baseValue={scaleType === "log" ? logFloor : 0}
               stroke="none"
               fill="#4f46e5"
               fillOpacity={0.18}
+              isAnimationActive={false}
             />
 
             {/* Base mask under p10 to keep outer band clean */}
             <Area
               type="monotone"
               dataKey="p10"
+              baseValue={scaleType === "log" ? logFloor : 0}
               stroke="none"
               fill="#ffffff"
-              fillOpacity={0.8}
+              fillOpacity={scaleType === "log" ? 0.95 : 0.8}
+              isAnimationActive={false}
             />
 
             {/* Sample random path threads if enabled */}
@@ -268,6 +292,7 @@ export function MonteCarloFanChart({
               strokeWidth={2}
               strokeDasharray="4 4"
               dot={false}
+              isAnimationActive={false}
             />
 
             {/* 50th percentile (Median) Line */}
@@ -277,12 +302,19 @@ export function MonteCarloFanChart({
               stroke="#0d9488"
               strokeWidth={3}
               dot={false}
+              isAnimationActive={false}
             />
 
             {/* 95th percentile Line */}
             <Line
               type="monotone"
               dataKey="p95"
+              stroke="#818cf8"
+              strokeWidth={1.5}
+              strokeDasharray="2 2"
+              dot={false}
+              isAnimationActive={false}
+            />
               stroke="#818cf8"
               strokeWidth={1.5}
               strokeDasharray="2 2"
