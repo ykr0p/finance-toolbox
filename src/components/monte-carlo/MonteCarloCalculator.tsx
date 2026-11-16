@@ -82,48 +82,48 @@ export function MonteCarloCalculator() {
           <div className="absolute right-0 top-0 bottom-0 w-1/3 opacity-15 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-300 to-transparent pointer-events-none" />
         </div>
 
-        {/* 2-Column Responsive Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* Left Column: Input Parameters Panel (5 cols on lg, 4 cols on xl) */}
-          <div className="lg:col-span-5 xl:col-span-4 space-y-6 lg:sticky lg:top-20">
-            <MonteCarloInputPanel
-              inputs={inputs}
-              onChange={setInputs}
+        {/* 1. Блок параметров симуляции (Шаги 1, 2, 3) */}
+        <section aria-label="Параметры стресс-теста: шаги 1, 2, 3">
+          <MonteCarloInputPanel
+            inputs={inputs}
+            onChange={setInputs}
+            currency={currency}
+          />
+        </section>
+
+        {/* 2. Блоки ключевых метрик стресс-теста */}
+        <section aria-label="Ключевые показатели стресс-теста">
+          <MonteCarloMetrics
+            result={result}
+            currency={currency}
+            mode={inputs.mode}
+          />
+        </section>
+
+        {/* 3. Затем Распределение вероятностей исходов и аналитика */}
+        <section aria-label="Распределение исходов и стресс-аналитика">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+            <MonteCarloHistogram
+              histogram={result.histogram}
               currency={currency}
             />
-          </div>
-
-          {/* Right Column: Visualization, Fan Chart, Histogram & Metrics */}
-          <div className="lg:col-span-7 xl:col-span-8 space-y-6">
-            {/* KPI Metric Cards */}
-            <MonteCarloMetrics
-              result={result}
-              currency={currency}
-              mode={inputs.mode}
-            />
-
-            {/* Fan Chart (Вероятностный веер) */}
-            <MonteCarloFanChart
-              result={result}
-              currency={currency}
-              scaleType={inputs.scaleType}
-              showSamplePaths={inputs.showSamplePaths}
-            />
-
-            {/* Insights & Recommendations */}
             <MonteCarloInsights
               result={result}
               currency={currency}
               mode={inputs.mode}
             />
-
-            {/* Histogram of Outcomes */}
-            <MonteCarloHistogram
-              histogram={result.histogram}
-              currency={currency}
-            />
           </div>
-        </div>
+        </section>
+
+        {/* 4. И внизу: Интерактивный вероятностный веер капитала (Fan Chart) */}
+        <section aria-label="Вероятностный веер траекторий капитала">
+          <MonteCarloFanChart
+            result={result}
+            currency={currency}
+            scaleType={inputs.scaleType}
+            showSamplePaths={inputs.showSamplePaths}
+          />
+        </section>
       </main>
 
       {/* Footer */}

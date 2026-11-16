@@ -15,6 +15,8 @@ import { ChartPoint, CompareResult } from "@/types/compare";
 import { CurrencyCode, CURRENCY_CONFIGS } from "@/types/fire";
 import { formatCompactCurrency, formatCurrency } from "@/lib/formatters";
 import { ASSET_DEFINITIONS } from "@/data/historicalReturns";
+import { HelpButton } from "@/components/common/HelpDialog";
+import { COMPARE_HELP } from "@/data/parametersHelp";
 
 interface CompareChartProps {
   result: CompareResult;
@@ -50,9 +52,12 @@ export function CompareChart({
     <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-4 sm:p-5 flex flex-col">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3 mb-4">
         <div>
-          <h2 className="text-sm sm:text-base font-bold text-slate-900">
-            Динамика роста капитала по активам
-          </h2>
+          <div className="flex items-center gap-1.5">
+            <h2 className="text-sm sm:text-base font-bold text-slate-900">
+              Динамика роста капитала по активам
+            </h2>
+            <HelpButton {...COMPARE_HELP.capitalChart} variant="question" />
+          </div>
           <p className="text-xs text-slate-500">
             Сравнение накопленного капитала при инвестировании с {result.startYear} по {result.endYear} год
           </p>

@@ -286,40 +286,34 @@ export function FireCalculator() {
         id="panel-calculator"
         role="tabpanel"
         aria-labelledby={`tab-${mode}`}
-        className="flex-1 max-w-[1840px] w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 py-6"
+        className="flex-1 max-w-[1840px] w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 py-6 space-y-8"
       >
-        {/* Split Screen Grid: Left (Inputs) | Right (Results, Chart, Table) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* Left Side: Inputs Form (5 cols on lg, 4 cols on xl/2xl) */}
-          <section
-            aria-label="Параметры симуляции"
-            className="lg:col-span-5 xl:col-span-4 lg:sticky lg:top-24"
-          >
-            <InputForm
-              mode={mode}
-              currency={currency}
-              simpleInputs={simpleInputs}
-              flexibleInputs={flexibleInputs}
-              onChangeSimple={setSimpleInputs}
-              onChangeFlexible={setFlexibleInputs}
-            />
-          </section>
+        {/* 1. Блок параметров: Пункты 1, 2, 3 */}
+        <section aria-label="Параметры симуляции: пункты 1, 2, 3">
+          <InputForm
+            mode={mode}
+            currency={currency}
+            simpleInputs={simpleInputs}
+            flexibleInputs={flexibleInputs}
+            onChangeSimple={setSimpleInputs}
+            onChangeFlexible={setFlexibleInputs}
+          />
+        </section>
 
-          {/* Right Side: Results, Chart, Table (7 cols on lg, 8 cols on xl/2xl) */}
-          <section
-            aria-label="Результаты расчета и симуляция"
-            className="lg:col-span-7 xl:col-span-8 space-y-6"
-          >
-            {/* Top Cards (Главные цифры) */}
-            <MetricCards result={calculationResult} currency={currency} />
+        {/* 2. Блоки со скриншота: Ключевые показатели и результаты расчета */}
+        <section aria-label="Ключевые показатели и результаты расчета">
+          <MetricCards result={calculationResult} currency={currency} />
+        </section>
 
-            {/* Recharts Growth Chart */}
-            <CapitalChart result={calculationResult} currency={currency} />
+        {/* 3. Затем Таблица симуляции по годам */}
+        <section aria-label="Таблица симуляции по годам">
+          <SimulationTable result={calculationResult} currency={currency} />
+        </section>
 
-            {/* Simulation Table Data Grid */}
-            <SimulationTable result={calculationResult} currency={currency} />
-          </section>
-        </div>
+        {/* 4. И внизу: Динамика роста капитала и целевой суммы */}
+        <section aria-label="Динамика роста капитала и целевой суммы">
+          <CapitalChart result={calculationResult} currency={currency} />
+        </section>
       </main>
 
       <footer className="border-t border-slate-200 bg-white py-6 mt-12 text-center text-xs text-slate-500">

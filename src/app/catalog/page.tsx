@@ -304,9 +304,9 @@ function CalculatorCatalogCard({ item }: { item: CalculatorMeta }) {
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <div
-              className={`w-9 h-9 rounded-xl bg-gradient-to-tr ${item.gradient} text-white flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform`}
+              className={`w-10 h-10 rounded-xl bg-gradient-to-tr ${item.gradient} bg-slate-800 text-white flex items-center justify-center shrink-0 shadow-sm border border-white/20 group-hover:scale-105 transition-transform`}
             >
-              <Icon className="w-4 h-4" />
+              <Icon className="w-5 h-5 text-white stroke-[2.2]" />
             </div>
             <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${block.badgeBg} ${block.badgeText}`}>
               {block.shortTitle}

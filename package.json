@@ -1,7 +1,9 @@
 {
-  "name": "fire-calculator",
+  "name": "finance-toolbox",
   "version": "1.0.0",
-  "private": true,
+  "description": "Open-source personal finance modeling platform, FIRE simulation, Monte Carlo stress-testing, and historical asset backtesting.",
+  "license": "MIT",
+  "private": false,
   "scripts": {
     "dev": "next dev",
     "build": "next build",

@@ -162,7 +162,10 @@ export function HelpButton({
     <>
       <button
         type="button"
-        onClick={() => setIsOpen(true)}
+        onClick={(e) => {
+          e.stopPropagation();
+          setIsOpen(true);
+        }}
         aria-label={buttonAriaLabel || `Справка: ${title}`}
         title="Нажмите, чтобы прочитать простое объяснение с примером"
         className={`inline-flex items-center justify-center w-4 h-4 rounded-full transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-indigo-500 ${

@@ -17,8 +17,10 @@ const BASELINE_2025 = {
   rgbitr: 742.7,
   cbr_usd: 77.4466,
   cbr_gold: 10907.88,
+  cbr_silver: 108.20,
   nbrb_usd: 3.0035,
   nbrb_gold: 388.5,
+  nbrb_silver: 3.85,
   btc_usd: 88500.0,
   irn_moscow_rub: 271200.0,
   realt_minsk_usd: 1820.0,
@@ -55,8 +57,14 @@ export async function GET() {
   let bondsReturn = 4.88;
   let usdRubChange = 6.73;
   let goldReturn = -6.29;
+  let silverReturn = -3.4;
   let btcReturn = -26.35;
   let sp500Return = 14.5;
+  let vwceReturn = 12.8;
+  let schdReturn = 4.2;
+  let vymReturn = 5.1;
+  let aggReturn = 2.1;
+  let vnqReturn = 3.5;
   let realEstateReturn = 4.2; // Moscow IRN.RU
   let realEstateMinskReturn = 18.1; // Minsk Realt.by / НКА in USD
   let depositsReturn = 14.8; // ЦБ РФ
@@ -66,6 +74,7 @@ export async function GET() {
   let inflationBynReturn = 5.4; // Белстат
   let usdBynChange = -0.1; // НБРБ
   let goldBynReturn = -3.8; // НБРБ
+  let silverBynReturn = -2.9; // НБРБ
 
   // 1. Fetch MOEX live values (MCFTR & RGBITR)
   try {
@@ -132,12 +141,21 @@ export async function GET() {
           goldReturn = Math.round(((lastGold / BASELINE_2025.cbr_gold) - 1) * 1000) / 10;
         }
       }
+
+      const silverMatches = [...goldXml.matchAll(/Code="2">[\s\S]*?<Buy>([\d,]+)<\/Buy>/g)];
+      if (silverMatches.length > 0) {
+        const lastSilverStr = silverMatches[silverMatches.length - 1][1];
+        const lastSilver = parseFloat(lastSilverStr.replace(",", "."));
+        if (lastSilver > 0) {
+          silverReturn = Math.round(((lastSilver / BASELINE_2025.cbr_silver) - 1) * 1000) / 10;
+        }
+      }
     }
   } catch {
     status.cbr = "cached";
   }
 
-  // 3. Fetch NBRB live values (USD/BYN rate and Gold prices in BYN)
+  // 3. Fetch NBRB live values (USD/BYN rate and Gold/Silver prices in BYN)
   try {
     const today = new Date();
     const yyyy = today.getFullYear();
@@ -168,6 +186,14 @@ export async function GET() {
             goldBynReturn = Math.round(((lastVal / BASELINE_2025.nbrb_gold) - 1) * 1000) / 10;
           }
         }
+
+        const silverItems = nbrbGoldData.filter((item: { MetalId?: number }) => item.MetalId === 1);
+        if (silverItems.length > 0) {
+          const lastSilverVal = Number(silverItems[silverItems.length - 1].Value);
+          if (lastSilverVal > 0) {
+            silverBynReturn = Math.round(((lastSilverVal / BASELINE_2025.nbrb_silver) - 1) * 1000) / 10;
+          }
+        }
       }
     }
   } catch {
@@ -193,8 +219,15 @@ export async function GET() {
     year: currentYear,
     mcftr: mcftrReturn,
     sp500_usd: sp500Return,
+    vwce_usd: vwceReturn,
+    schd_usd: schdReturn,
+    vym_usd: vymReturn,
+    agg_usd: aggReturn,
+    vnq_usd: vnqReturn,
     gold_rub: goldReturn,
     gold_byn: goldBynReturn,
+    silver_rub: silverReturn,
+    silver_byn: silverBynReturn,
     real_estate_rub: realEstateReturn,
     real_estate_minsk_usd: realEstateMinskReturn,
     deposits_rub: depositsReturn,

@@ -85,10 +85,12 @@ export function AssetComparisonCalculator() {
               const isIdentical =
                 cur.mcftr === json.data.mcftr &&
                 cur.gold_rub === json.data.gold_rub &&
+                cur.silver_rub === json.data.silver_rub &&
                 cur.usd_rub_change === json.data.usd_rub_change &&
                 cur.bonds_rub === json.data.bonds_rub &&
                 cur.btc_usd === json.data.btc_usd &&
                 cur.gold_byn === json.data.gold_byn &&
+                cur.silver_byn === json.data.silver_byn &&
                 cur.usd_byn_change === json.data.usd_byn_change;
               if (isIdentical) {
                 return prev; // Avoid redundant re-render and visual jump
@@ -149,40 +151,42 @@ export function AssetComparisonCalculator() {
           <div className="absolute right-0 top-0 bottom-0 w-1/3 opacity-10 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white to-transparent pointer-events-none" />
         </div>
 
-        {/* 2-Column Responsive Layout: Controls on Left, Visuals on Right */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* Left Column: Parameters Panel (5 cols on lg, 4 cols on xl/2xl) */}
-          <div className="lg:col-span-5 xl:col-span-4 space-y-6 lg:sticky lg:top-20">
-            <CompareInputPanel
-              inputs={inputs}
-              onChange={setInputs}
-              currency={currency}
-              isOnline={isOnline}
-              lastOnlineUpdate={lastOnlineUpdate}
-              onRefreshOnline={fetchLiveMarketData}
-              isRefreshing={isRefreshing}
-            />
-          </div>
+        {/* 1. Блок параметров симуляции (Шаги 1, 2, 3) */}
+        <section aria-label="Параметры симуляции: шаги 1, 2, 3">
+          <CompareInputPanel
+            inputs={inputs}
+            onChange={setInputs}
+            currency={currency}
+            isOnline={isOnline}
+            lastOnlineUpdate={lastOnlineUpdate}
+            onRefreshOnline={fetchLiveMarketData}
+            isRefreshing={isRefreshing}
+          />
+        </section>
 
-          {/* Right Column: Results, Charts & Tables (7 cols on lg, 8 cols on xl/2xl) */}
-          <div className="lg:col-span-7 xl:col-span-8 space-y-6">
-            {/* Leaderboard Cards */}
-            <CompareLeaderboard result={result} currency={currency} />
+        {/* 2. Блоки ключевых результатов: Лидерборд и победители */}
+        <section aria-label="Результаты и лидерборд доходности">
+          <CompareLeaderboard result={result} currency={currency} />
+        </section>
 
-            {/* Interactive Dynamic Capital Chart */}
-            <CompareChart
-              result={result}
-              currency={currency}
-              scaleType={inputs.scaleType}
-            />
+        {/* 3. Затем Таблица исторической доходности по годам */}
+        <section aria-label="Таблица исторической доходности по годам">
+          <CompareAnnualTable result={result} currency={currency} />
+        </section>
 
-            {/* Educational Insights */}
-            <CompareInsights result={result} currency={currency} />
+        {/* 4. И внизу: Динамика роста капитала классов активов */}
+        <section aria-label="Динамика роста капитала классов активов">
+          <CompareChart
+            result={result}
+            currency={currency}
+            scaleType={inputs.scaleType}
+          />
+        </section>
 
-            {/* Annual Matrix & Return Grid */}
-            <CompareAnnualTable result={result} currency={currency} />
-          </div>
-        </div>
+        {/* 5. Аналитические выводы и инсайты */}
+        <section aria-label="Аналитические выводы и инсайты">
+          <CompareInsights result={result} currency={currency} />
+        </section>
       </main>
 
       {/* Footer */}

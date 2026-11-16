@@ -13,6 +13,8 @@ import {
 import { AssetMetrics, CompareResult } from "@/types/compare";
 import { CurrencyCode, CURRENCY_CONFIGS } from "@/types/fire";
 import { formatCurrency } from "@/lib/formatters";
+import { HelpButton } from "@/components/common/HelpDialog";
+import { COMPARE_HELP } from "@/data/parametersHelp";
 
 interface CompareLeaderboardProps {
   result: CompareResult;
@@ -35,9 +37,12 @@ export function CompareLeaderboard({
             <Trophy className="w-4 h-4" />
           </div>
           <div>
-            <h2 className="text-sm sm:text-base font-bold text-slate-900">
-              Рейтинг доходности активов
-            </h2>
+            <div className="flex items-center gap-1.5">
+              <h2 className="text-sm sm:text-base font-bold text-slate-900">
+                Рейтинг доходности активов
+              </h2>
+              <HelpButton {...COMPARE_HELP.leaderboard} variant="question" />
+            </div>
             <p className="text-xs text-slate-500">
               Итоговые результаты за {result.yearsCount} лет (с {result.startYear} по {result.endYear})
             </p>

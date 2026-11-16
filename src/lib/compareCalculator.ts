@@ -22,9 +22,30 @@ export function getAssetAnnualReturn(
 
   // Базовые долларовые доходности для перекрестного пересчета
   const goldUsdReturn = (1 + data.gold_rub / 100) / usdRubFactor - 1;
+  const silverUsdReturn = (1 + data.silver_rub / 100) / usdRubFactor - 1;
   const mcftrUsdReturn = (1 + data.mcftr / 100) / usdRubFactor - 1;
   const reMosUsdReturn = (1 + data.real_estate_rub / 100) / usdRubFactor - 1;
   const reMinskUsdReturn = (data.real_estate_minsk_usd ?? 0) / 100;
+
+  // Вспомогательная функция расчета долларовой доходности зарубежных ETF
+  const getUsdEtfReturn = (id: AssetId): number => {
+    switch (id) {
+      case "sp500":
+        return data.sp500_usd;
+      case "vwce":
+        return data.vwce_usd ?? data.sp500_usd * 0.95;
+      case "schd":
+        return data.schd_usd ?? data.sp500_usd;
+      case "vym":
+        return data.vym_usd ?? data.sp500_usd * 0.9;
+      case "agg":
+        return data.agg_usd ?? 3.5;
+      case "vnq":
+        return data.vnq_usd ?? 8.0;
+      default:
+        return 0;
+    }
+  };
 
   if (currency === "BYN") {
     // Расчет в белорусских рублях (BYN)
@@ -33,10 +54,19 @@ export function getAssetAnnualReturn(
         // Акции РФ в BYN: долларовый доход + динамика USD/BYN
         return ((1 + mcftrUsdReturn) * usdBynFactor - 1) * 100;
       case "sp500":
-        return ((1 + data.sp500_usd / 100) * usdBynFactor - 1) * 100;
+      case "vwce":
+      case "schd":
+      case "vym":
+      case "agg":
+      case "vnq":
+        return ((1 + getUsdEtfReturn(assetId) / 100) * usdBynFactor - 1) * 100;
       case "gold":
         // Золото в BYN (по официальным учетным ценам слитков НБРБ)
         return ((1 + goldUsdReturn) * usdBynFactor - 1) * 100;
+      case "silver":
+        // Серебро в BYN (учетные цены НБРБ или пересчет через кросс-курс)
+        if (data.silver_byn !== undefined) return data.silver_byn;
+        return ((1 + silverUsdReturn) * usdBynFactor - 1) * 100;
       case "real_estate":
         // Недвижимость Москвы в BYN
         return ((1 + reMosUsdReturn) * usdBynFactor - 1) * 100;
@@ -66,9 +96,16 @@ export function getAssetAnnualReturn(
       case "mcftr":
         return data.mcftr;
       case "sp500":
-        return ((1 + data.sp500_usd / 100) * usdRubFactor - 1) * 100;
+      case "vwce":
+      case "schd":
+      case "vym":
+      case "agg":
+      case "vnq":
+        return ((1 + getUsdEtfReturn(assetId) / 100) * usdRubFactor - 1) * 100;
       case "gold":
         return data.gold_rub;
+      case "silver":
+        return data.silver_rub;
       case "real_estate":
         return data.real_estate_rub;
       case "real_estate_minsk":
@@ -97,9 +134,16 @@ export function getAssetAnnualReturn(
       case "mcftr":
         return mcftrUsdReturn * 100;
       case "sp500":
-        return data.sp500_usd;
+      case "vwce":
+      case "schd":
+      case "vym":
+      case "agg":
+      case "vnq":
+        return getUsdEtfReturn(assetId);
       case "gold":
         return goldUsdReturn * 100;
+      case "silver":
+        return silverUsdReturn * 100;
       case "real_estate":
         return reMosUsdReturn * 100;
       case "real_estate_minsk":

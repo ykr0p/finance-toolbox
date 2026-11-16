@@ -6,6 +6,8 @@ import { CompareResult } from "@/types/compare";
 import { CurrencyCode, CURRENCY_CONFIGS } from "@/types/fire";
 import { formatCurrency } from "@/lib/formatters";
 import { ASSET_DEFINITIONS } from "@/data/historicalReturns";
+import { HelpButton } from "@/components/common/HelpDialog";
+import { COMPARE_HELP } from "@/data/parametersHelp";
 
 interface CompareAnnualTableProps {
   result: CompareResult;
@@ -69,9 +71,12 @@ export function CompareAnnualTable({
             <TableIcon className="w-4 h-4" />
           </div>
           <div>
-            <h2 className="text-sm sm:text-base font-bold text-slate-900">
-              Погодовая таблица результатов
-            </h2>
+            <div className="flex items-center gap-1.5">
+              <h2 className="text-sm sm:text-base font-bold text-slate-900">
+                Погодовая таблица результатов
+              </h2>
+              <HelpButton {...COMPARE_HELP.annualTable} variant="question" />
+            </div>
             <p className="text-xs text-slate-500">
               Детализация динамики капитала и доходностей по каждому году
             </p>

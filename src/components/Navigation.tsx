@@ -206,9 +206,9 @@ export function Navigation({ rightSlot }: NavigationProps) {
                             }`}
                           >
                             <div
-                              className={`w-7 h-7 rounded-lg bg-gradient-to-tr ${item.gradient} text-white flex items-center justify-center shrink-0 shadow-xs mt-0.5`}
+                              className={`w-7 h-7 rounded-lg bg-gradient-to-tr ${item.gradient} bg-slate-800 text-white flex items-center justify-center shrink-0 shadow-xs mt-0.5`}
                             >
-                              <Icon className="w-3.5 h-3.5" />
+                              <Icon className="w-3.5 h-3.5 text-white stroke-[2.2]" />
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center justify-between gap-1">

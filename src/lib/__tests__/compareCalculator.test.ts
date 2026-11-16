@@ -141,4 +141,75 @@ console.log("--- Running Compare Calculator Unit Tests ---");
   console.log(`✓ Test 5 passed: Full 24-year simulation up to 2026 (YTD) verified.`);
 }
 
+// Test 6: Silver asset verification across currencies
+{
+  const resultRub = calculateAssetComparison({
+    initialAmount: 100000,
+    monthlyContribution: 0,
+    startYear: 2003,
+    endYear: 2024,
+    selectedAssets: ["silver", "gold"],
+    currency: "RUB",
+    adjustForInflation: false,
+    scaleType: "linear",
+    includeBalancedPortfolio: false,
+  });
+
+  const silverMetric = resultRub.metrics.find((m) => m.assetId === "silver");
+  assert(silverMetric !== undefined, "Silver metric must exist");
+  assert(silverMetric!.finalValue > 100000, "Silver in RUB must have grown over 2003-2024");
+  assert(silverMetric!.multiple > 5.0, "Silver multiple should exceed x5 over 2003-2024");
+
+  // Check BYN calculation
+  const resultByn = calculateAssetComparison({
+    initialAmount: 1000,
+    monthlyContribution: 0,
+    startYear: 2018,
+    endYear: 2024,
+    selectedAssets: ["silver"],
+    currency: "BYN",
+    adjustForInflation: false,
+    scaleType: "linear",
+    includeBalancedPortfolio: false,
+  });
+  const silverByn = resultByn.metrics[0];
+  assert(silverByn.finalValue > 1000, "Silver in BYN must have positive return over 2018-2024");
+
+  console.log(`✓ Test 6 passed: Silver (XAG) verified in RUB (x${silverMetric!.multiple}) and BYN (x${silverByn.multiple}).`);
+}
+
+// Test 7: Global ETFs verification (VOO, VWCE, SCHD, VYM, AGG, VNQ)
+{
+  const resultUsd = calculateAssetComparison({
+    initialAmount: 10000,
+    monthlyContribution: 500,
+    startYear: 2012,
+    endYear: 2024,
+    selectedAssets: ["sp500", "vwce", "schd", "vym", "agg", "vnq"],
+    currency: "USD",
+    adjustForInflation: false,
+    scaleType: "linear",
+    includeBalancedPortfolio: true,
+  });
+
+  assert(resultUsd.metrics.length === 7, "Should have 6 ETFs + 1 Balanced Portfolio");
+  const schd = resultUsd.metrics.find((m) => m.assetId === "schd");
+  const vwce = resultUsd.metrics.find((m) => m.assetId === "vwce");
+  const agg = resultUsd.metrics.find((m) => m.assetId === "agg");
+  const vnq = resultUsd.metrics.find((m) => m.assetId === "vnq");
+
+  assert(schd !== undefined && schd.finalValue > 10000, "SCHD must show positive growth");
+  assert(vwce !== undefined && vwce.finalValue > 10000, "VWCE must show positive growth");
+  assert(agg !== undefined && agg.finalValue > 0, "AGG must exist and be positive");
+  assert(vnq !== undefined && vnq.finalValue > 10000, "VNQ must show positive growth");
+
+  // In 2022, SCHD had much lower drawdown than broad market
+  const schd2022 = resultUsd.annualReturns.find((p) => p.year === 2022);
+  assert(schd2022 !== undefined, "2022 annual return point must exist");
+  assert(Number(schd2022!.schd) === -3.2, "SCHD return in 2022 should be -3.2%");
+  assert(Number(schd2022!.vym) === -0.4, "VYM return in 2022 should be -0.4%");
+
+  console.log(`✓ Test 7 passed: Global ETFs (VOO, VWCE, SCHD, VYM, AGG, VNQ) verified. SCHD multiple: x${schd!.multiple}, Balanced multiple: x${resultUsd.metrics.find((m) => m.assetId === "portfolio")!.multiple}`);
+}
+
 console.log("All Compare Calculator unit tests passed successfully!");
