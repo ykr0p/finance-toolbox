@@ -76,6 +76,7 @@ export function MonteCarloMetrics({ result, currency, mode }: MonteCarloMetricsP
 
           <div className="flex items-baseline gap-2">
             <span
+              suppressHydrationWarning
               className={`text-2xl sm:text-3xl font-black tracking-tight ${
                 isHighlySafe
                   ? "text-emerald-700"
@@ -86,7 +87,10 @@ export function MonteCarloMetrics({ result, currency, mode }: MonteCarloMetricsP
             >
               {successRate}%
             </span>
-            <span className="text-xs text-slate-500 font-semibold">
+            <span
+              suppressHydrationWarning
+              className="text-xs text-slate-500 font-semibold"
+            >
               из {simulationCount.toLocaleString("ru-RU")} сценариев
             </span>
           </div>
@@ -110,7 +114,7 @@ export function MonteCarloMetrics({ result, currency, mode }: MonteCarloMetricsP
             <span className="text-[10px] text-slate-400">Базовый сценарий</span>
           </div>
 
-          <div className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+          <div suppressHydrationWarning className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
             {formatCurrency(medianFinalCapital, currency)}
           </div>
 
@@ -132,6 +136,7 @@ export function MonteCarloMetrics({ result, currency, mode }: MonteCarloMetricsP
           </div>
 
           <div
+            suppressHydrationWarning
             className={`text-xl sm:text-2xl font-black tracking-tight ${
               worst10PercentileFinalCapital <= 0 ? "text-rose-600" : "text-slate-900"
             }`}
@@ -169,7 +174,7 @@ export function MonteCarloMetrics({ result, currency, mode }: MonteCarloMetricsP
             </span>
           </div>
 
-          <div className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+          <div suppressHydrationWarning className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
             {mode === "retirement"
               ? `${safeWithdrawalRate95}%/год`
               : formatCurrency(best10PercentileFinalCapital, currency)}

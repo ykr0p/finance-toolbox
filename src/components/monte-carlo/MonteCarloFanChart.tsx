@@ -31,6 +31,11 @@ export function MonteCarloFanChart({
   showSamplePaths,
 }: MonteCarloFanChartProps) {
   const { percentileTrajectory, years, computationTimeMs, simulationCount } = result;
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Transform data for stacked shaded bands in Recharts
   // Band 1: Base up to p5
@@ -88,8 +93,11 @@ export function MonteCarloFanChart({
         </div>
 
         <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
-          <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700">
-            {simulationCount.toLocaleString("ru-RU")} прогонов за {computationTimeMs} мс
+          <span
+            suppressHydrationWarning
+            className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700"
+          >
+            {simulationCount.toLocaleString("ru-RU")} прогонов{mounted && computationTimeMs > 0 ? ` за ${computationTimeMs} мс` : ""}
           </span>
           <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200/60 text-[11px] font-semibold">
             <span>{scaleType === "log" ? "Шкала: Log" : "Шкала: Линейная"}</span>
