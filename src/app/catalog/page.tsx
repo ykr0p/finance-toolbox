@@ -72,6 +72,9 @@ export default function CatalogPage() {
     });
   }, [searchQuery, selectedBlock, statusFilter]);
 
+  const readyCount = useMemo(() => CALCULATORS_CATALOG.filter((c) => c.status === "ready").length, []);
+  const inDevCount = useMemo(() => CALCULATORS_CATALOG.filter((c) => c.status === "in_development").length, []);
+
   const blocksList: CalculatorBlockId[] = ["investments", "loans", "taxes", "budget", "advanced"];
 
   return (
@@ -135,7 +138,7 @@ export default function CatalogPage() {
                 }`}
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                <span>Готовые (2)</span>
+                <span>Готовые ({readyCount})</span>
               </button>
               <button
                 type="button"
@@ -147,7 +150,7 @@ export default function CatalogPage() {
                 }`}
               >
                 <Clock className="w-3 h-3 text-amber-600" />
-                <span>В разработке (13)</span>
+                <span>В разработке ({inDevCount})</span>
               </button>
             </div>
           </div>

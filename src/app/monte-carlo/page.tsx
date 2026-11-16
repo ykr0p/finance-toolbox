@@ -1,13 +1,12 @@
 ﻿import { Metadata } from "next";
-import { UnderDevelopmentPage } from "@/components/common/UnderDevelopmentPage";
-import { CALCULATORS_CATALOG } from "@/data/calculatorsCatalog";
+import { MonteCarloCalculator } from "@/components/monte-carlo/MonteCarloCalculator";
 
 export const metadata: Metadata = {
-  title: "Калькулятор Монте-Карло | Финансовый Калькулятор",
-  description: "Вероятностный стресс-тест портфеля с прогоном 10 000 случайных сценариев",
+  title: "Калькулятор Монте-Карло: Стресс-тест инвестиций | Финансовый Калькулятор",
+  description:
+    "Продвинутая симуляция Монте-Карло с прогоном тысяч случайных рыночных сценариев, веером квантилей и оценкой риска последовательности доходностей.",
 };
 
-export default function Page() {
-  const meta = CALCULATORS_CATALOG.find((c) => c.slug === "monte-carlo")!;
-  return <UnderDevelopmentPage meta={meta} />;
+export default function MonteCarloPage() {
+  return <MonteCarloCalculator />;
 }

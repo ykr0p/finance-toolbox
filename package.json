@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "tsx src/lib/__tests__/calculator.test.ts && tsx src/lib/__tests__/compareCalculator.test.ts"
+    "test": "tsx src/lib/__tests__/calculator.test.ts && tsx src/lib/__tests__/compareCalculator.test.ts && tsx src/lib/__tests__/monteCarloCalculator.test.ts"
   },
   "dependencies": {
     "clsx": "^2.1.1",
